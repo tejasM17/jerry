@@ -14,7 +14,7 @@ const ChatPage = () => {
   if (user === undefined) return <div>Loading...</div>;
   if (!user) return <Navigate to="/login" />;
   return (
-    <div className="flex h-screen text-white bg-[#212121]">
+    <div className="flex h-screen overflow-hidden text-white bg-[#212121]">
       <Sidebar
         refreshSidebar={refreshSidebar}
         sidebarOpen={sidebarOpen}

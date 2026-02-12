@@ -8,15 +8,19 @@ import {
 import { auth } from "../firebase/firebase.config";
 import { useNavigate, Link } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const Register = () => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
 
   const handleRegister = async () => {
+    setError(null);
     try {
       // 1️⃣ Create account
       const cred = await createUserWithEmailAndPassword(auth, email, password);
@@ -28,16 +32,17 @@ const Register = () => {
 
       navigate("/");
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setError(null);
     try {
       await signInWithPopup(auth, provider);
       navigate("/");
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
     }
   };
 
@@ -46,7 +51,7 @@ const Register = () => {
       className="min-h-screen flex items-center justify-center bg-cover bg-center bg-no-repeat text-white px-4"
       style={{
         backgroundImage:
-          "url('https://images.unsplash.com/photo-1616036740257-9449ea1f6605?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
+          "url('https://images.unsplash.com/photo-1616036740257-9449ea1f6605?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D')",
       }}
     >
       <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-lg p-6 sm:p-10 w-full max-w-sm space-y-6 sm:space-y-8">
@@ -66,12 +71,27 @@ const Register = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <input
-          type="password"
-          placeholder="Enter your password"
-          className="w-full py-3 bg-transparent border-b border-white/50 placeholder-white/70 focus:border-white outline-none"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            className="w-full py-3 bg-transparent border-b border-white/50 placeholder-white/70 focus:border-white outline-none"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+          >
+            {showPassword ? (
+              <AiOutlineEyeInvisible size={20} />
+            ) : (
+              <AiOutlineEye size={20} />
+            )}
+          </button>
+        </div>
+
+        {error && <p className="text-red-300 text-sm text-center">{error}</p>}
 
         <button
           onClick={handleRegister}

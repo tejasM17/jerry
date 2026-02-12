@@ -9,7 +9,7 @@ const MessageBubble = ({ message }) => {
   return (
     <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
       <div
-        className={`max-w-3xl px-4 py-3 rounded-lg ${
+        className={` max-w-3xl px-4 py-3 rounded-lg break-words ${
           isUser ? "bg-[#303030] text-white" : "bg-[#212121] text-gray-200"
         }`}
       >

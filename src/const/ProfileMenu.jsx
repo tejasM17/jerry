@@ -83,7 +83,7 @@ const ProfileMenu = ({ user }) => {
       {/* Profile Button */}
       <div
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#1a1a1a] cursor-pointer"
+        className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-[#303030] cursor-pointer"
       >
         {user?.photoURL ? (
           <img

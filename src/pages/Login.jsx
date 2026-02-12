@@ -11,15 +11,21 @@ import {
 import { auth } from "../firebase/firebase.config";
 import { useNavigate, Link } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
+import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
   const navigate = useNavigate();
   const provider = new GoogleAuthProvider();
 
   const handleLogin = async () => {
+    setError(null);
+    setSuccess(null);
     try {
       await setPersistence(
         auth,
@@ -28,29 +34,33 @@ const Login = () => {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/");
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
     }
   };
 
   const handleGoogleSignIn = async () => {
+    setError(null);
+    setSuccess(null);
     try {
       await signInWithPopup(auth, provider);
       navigate("/");
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
     }
   };
 
   const handleForgotPassword = async () => {
+    setError(null);
+    setSuccess(null);
     if (!email) {
-      alert("Please enter your email first.");
+      setError("Please enter your email first.");
       return;
     }
     try {
       await sendPasswordResetEmail(auth, email);
-      alert("Password reset email sent!");
+      setSuccess("Password reset email sent!");
     } catch (error) {
-      alert(error.message);
+      setError(error.message);
     }
   };
 
@@ -72,12 +82,25 @@ const Login = () => {
           onChange={(e) => setEmail(e.target.value)}
         />
 
-        <input
-          type="password"
-          placeholder="Enter your password"
-          className="w-full py-3 bg-transparent border-b border-white/50 placeholder-white/70 focus:border-white outline-none"
-          onChange={(e) => setPassword(e.target.value)}
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="Enter your password"
+            className="w-full py-3 bg-transparent border-b border-white/50 placeholder-white/70 focus:border-white outline-none"
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+          >
+            {showPassword ? (
+              <AiOutlineEyeInvisible size={20} />
+            ) : (
+              <AiOutlineEye size={20} />
+            )}
+          </button>
+        </div>
 
         <div className="flex justify-between items-center text-sm">
           <label className="flex items-center">
@@ -93,6 +116,11 @@ const Login = () => {
             Forgot password?
           </button>
         </div>
+
+        {error && <p className="text-red-300 text-sm text-center">{error}</p>}
+        {success && (
+          <p className="text-green-300 text-sm text-center">{success}</p>
+        )}
 
         <button
           onClick={handleLogin}
