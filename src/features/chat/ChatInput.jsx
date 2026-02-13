@@ -25,7 +25,7 @@ const ChatInput = ({ onSend, loading }) => {
   };
 
   return (
-    <div className="px-4 py-3 bg-[#212121] border-t border-gray-800">
+    <div className="px-2 pb-5 pt-3 bg-[#212121] ">
       <div className="max-w-4xl mx-auto">
         <div className="flex items-center bg-[#303030] rounded-2xl p-3 shadow-md">
           <button className="px-2 text-gray-400 hover:text-white">
