@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { auth } from "../../firebase/firebase.config";
 import ProfileMenu from "../../const/ProfileMenu";
+import JerryIcon from "../../assets/jerry.svg";
 
 import {
   FiX,
@@ -86,10 +87,10 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
         <div className="flex items-center gap-3">
           {/* ChatGPT / OpenAI Logo (replace with real SVG if needed) */}
           <div className="w-8 h-8 bg-white/10 rounded-lg flex items-center justify-center">
-            <span className="text-white font-bold text-lg">J</span>
+            <img src={JerryIcon} alt="Jerry Logo" className="w-full h-full" />
           </div>
           {!isCollapsed && (
-            <span className="text-lg font-semibold">Jerry by Tejas</span>
+            <span className="text-lg font-semibold">by Tejas</span>
           )}
         </div>
         <button
