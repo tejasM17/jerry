@@ -32,3 +32,8 @@ Install dependencies & Run server
 npm install
 npm run dev
 ```
+
+## Backend Repo
+```
+https://github.com/tejasM17/jerry-api
+```
