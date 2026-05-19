@@ -21,6 +21,24 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
           messages.map((msg, index) => (
             <MessageBubble key={index} message={msg} />
           ))}
+        {loading && !messages.some((m) => m.role === "streaming") && (
+          <div className="flex justify-start">
+            <div className="bg-[#212121] text-gray-200 px-4 py-3 rounded-lg flex space-x-1 items-center">
+              <div
+                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0s" }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0.2s" }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0.4s" }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Input */}
