@@ -38,6 +38,12 @@ const ChatInput = ({ onSend, loading }) => {
               setText(e.target.value);
               handleInput();
             }}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
             placeholder="Ask anything"
             className="flex-1 bg-transparent resize-none outline-none text-white mx-2 max-h-[200px] overflow-y-hidden"
             rows={1}

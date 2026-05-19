@@ -31,53 +31,69 @@ export const useChat = (user) => {
 
     setMessages((prev) => [...prev, { role: "user", content: prompt }]);
 
-    const endpoint = activeChatId
-      ? `${API_BASE}/chat/${activeChatId}/continue`
-      : `${API_BASE}/chat/new`;
+    try {
+      const endpoint = activeChatId
+        ? `${API_BASE}/chat/${activeChatId}/continue`
+        : `${API_BASE}/chat/new`;
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ prompt }),
-    });
-
-    // NEW: get chatId from response header
-    const newChatId = response.headers.get("X-Chat-Id");
-
-    if (newChatId) {
-      setActiveChatId(newChatId);
-    }
-
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
-
-    let assistantMessage = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-      assistantMessage += chunk;
-
-      setMessages((prev) => {
-        const withoutStreaming = prev.filter((m) => m.role !== "streaming");
-        return [
-          ...withoutStreaming,
-          { role: "streaming", content: assistantMessage },
-        ];
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ prompt }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Failed to send message: ${response.statusText}`);
+      }
+
+      // NEW: get chatId from response header
+      const newChatId = response.headers.get("X-Chat-Id");
+
+      if (newChatId) {
+        setActiveChatId(newChatId);
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      let assistantMessage = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        assistantMessage += chunk;
+
+        setMessages((prev) => {
+          const withoutStreaming = prev.filter((m) => m.role !== "streaming");
+          return [
+            ...withoutStreaming,
+            { role: "streaming", content: assistantMessage },
+          ];
+        });
+      }
+
+      setMessages((prev) => [
+        ...prev.filter((m) => m.role !== "streaming"),
+        { role: "assistant", content: assistantMessage },
+      ]);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Sorry, I encountered an error. Please try again.",
+          error: true,
+        },
+      ]);
+    } finally {
+      setLoading(false);
     }
-
-    setMessages((prev) => [
-      ...prev.filter((m) => m.role !== "streaming"),
-      { role: "assistant", content: assistantMessage },
-    ]);
-
-    setLoading(false);
   };
 
   return {
