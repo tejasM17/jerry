@@ -79,22 +79,30 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
         <span className="text-sm font-medium">Jerry</span>
       </div>
 
-      {/* Messages area */}
-      <div
-        ref={scrollRef}
-        onScroll={handleScroll}
-        className="flex-1 overflow-y-auto overflow-x-hidden px-3 md:px-4 py-4 md:py-6 relative scroll-smooth"
-      >
-        <div className="max-w-4xl mx-auto space-y-4 md:space-y-5">
-          {hasMessages ? (
-            messages.map((msg, index) => (
-              <MessageBubble key={index} message={msg} />
-            ))
-          ) : (
-            <EmptyState />
-          )}
-        </div>
-        <div ref={bottomRef} />
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-6">
+        {Array.isArray(messages) &&
+          messages.map((msg, index) => (
+            <MessageBubble key={index} message={msg} />
+          ))}
+        {loading && !messages.some((m) => m.role === "streaming") && (
+          <div className="flex justify-start">
+            <div className="bg-[#212121] text-gray-200 px-4 py-3 rounded-lg flex space-x-1 items-center">
+              <div
+                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0s" }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0.2s" }}
+              ></div>
+              <div
+                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                style={{ animationDelay: "0.4s" }}
+              ></div>
+            </div>
+          </div>
+        )}
       </div>
 
       <ScrollToBottom

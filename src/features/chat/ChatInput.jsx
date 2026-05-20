@@ -53,7 +53,12 @@ const ChatInput = ({ onSend, loading }) => {
               setText(e.target.value);
               handleInput();
             }}
-            onKeyDown={handleKeyDown}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
             placeholder="Ask anything"
             rows={1}
             aria-label="Message input"
