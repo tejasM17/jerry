@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { API_BASE } from "../../api/base";
 
 export const useChat = (user) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [activeChatId, setActiveChatId] = useState(null);
 
   const loadChat = async (chatId) => {
@@ -103,5 +104,6 @@ export const useChat = (user) => {
     activeChatId,
     setActiveChatId,
     loading,
+    error,
   };
 };
