@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeHighlight from "rehype-highlight";
-import { FiCopy, FiCheck, FiUser, FiCpu } from "react-icons/fi";
+import { FiCopy, FiCheck } from "react-icons/fi";
 import { motion } from "framer-motion";
 
 const CopyButton = ({ text }) => {
@@ -34,20 +34,14 @@ const MessageBubble = ({ message }) => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-      className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}
+      className={`flex ${isUser ? "justify-end" : "justify-start"}`}
     >
-      {!isUser && (
-        <div className="shrink-0 mt-1 w-8 h-8 rounded-xl bg-[var(--accent-soft)] ring-1 ring-[var(--accent)]/20 flex items-center justify-center">
-          <FiCpu size={15} className="text-[var(--accent)]" />
-        </div>
-      )}
-
       <div
-        className={`max-w-[90%] sm:max-w-[75%] lg:max-w-[65%] px-4 py-3 rounded-2xl break-words leading-relaxed text-sm ${
+        className={`px-4 py-3 rounded-2xl break-words leading-relaxed text-sm ${
           isUser
             ? "bg-[var(--accent)]/10 ring-1 ring-[var(--accent)]/15 text-[var(--text-primary)]"
-            : "bg-[var(--surface-elevated)] ring-1 ring-[var(--border-subtle)] text-[var(--text-primary)]"
-        }`}
+            : "text-[var(--text-primary)]"
+        } ${isUser ? "max-w-[85%] sm:max-w-[70%]" : "max-w-full"}`}
       >
         {isStreaming && (
           <span className="inline-flex items-center gap-1">
@@ -160,12 +154,6 @@ const MessageBubble = ({ message }) => {
           {message.content}
         </ReactMarkdown>
       </div>
-
-      {isUser && (
-        <div className="shrink-0 mt-1 w-8 h-8 rounded-xl bg-[var(--surface-elevated)] ring-1 ring-[var(--border-subtle)] flex items-center justify-center">
-          <FiUser size={15} className="text-[var(--text-secondary)]" />
-        </div>
-      )}
     </motion.div>
   );
 };

@@ -36,12 +36,12 @@ const ChatInput = ({ onSend, loading }) => {
   );
 
   return (
-    <div className="px-3 pb-5 pt-2 bg-[var(--surface)]">
+    <div className="px-3 md:px-4 pb-3 pt-1 bg-[var(--surface)]">
       <div className="max-w-4xl mx-auto">
-        <div className="flex items-end bg-[var(--surface-elevated)] rounded-2xl p-2.5 ring-1 ring-[var(--border-subtle)] focus-within:ring-[var(--border-default)] transition-all duration-200">
+        <div className="flex items-end bg-[var(--surface-elevated)] rounded-2xl pl-3 pr-2 py-2 ring-1 ring-[var(--border-subtle)] focus-within:ring-[var(--border-default)] transition-all duration-200">
           <button
             aria-label="Add attachment"
-            className="shrink-0 mb-0.5 p-2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] rounded-xl transition-all duration-200"
+            className="shrink-0 mb-0.5 p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] rounded-lg transition-all duration-200"
           >
             <FiPlus size={18} />
           </button>
@@ -62,7 +62,7 @@ const ChatInput = ({ onSend, loading }) => {
             placeholder="Ask anything"
             rows={1}
             aria-label="Message input"
-            className="flex-1 bg-transparent resize-none outline-none text-[var(--text-primary)] mx-2 max-h-[200px] leading-relaxed text-sm placeholder-[var(--text-tertiary)]"
+            className="flex-1 bg-transparent resize-none outline-none text-[var(--text-primary)] px-2 py-0.5 max-h-[160px] leading-relaxed text-sm placeholder-[var(--text-tertiary)]"
             style={{ height: "auto" }}
           />
 
@@ -111,14 +111,14 @@ const ChatInput = ({ onSend, loading }) => {
                 exit={{ scale: 0.8, opacity: 0 }}
                 transition={{ duration: 0.15 }}
                 aria-label="Voice input"
-                className="shrink-0 mb-0.5 p-2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] hover:bg-white/[0.04] rounded-xl transition-all duration-200"
+                className="shrink-0 mb-0.5 p-2 text-[var(--text-tertiary)] hover:text-[var(--text-secondary)] rounded-lg transition-all duration-200"
               >
                 <FiMic size={18} />
               </motion.button>
             )}
           </AnimatePresence>
         </div>
-        <p className="text-center text-xs text-[var(--text-tertiary)] mt-2 max-w-4xl mx-auto">
+        <p className="text-center text-xs text-[var(--text-tertiary)] mt-2 select-none">
           Jerry can make mistakes. Verify important info.
         </p>
       </div>
