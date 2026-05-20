@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "filesystem": {
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
+    },
+    "tailwind": {
+      "type": "local",
+      "command": ["npx", "-y", "tailwindcss-mcp-server"]
+    },
+    "websearch": {
+      "type": "local",
+      "command": ["npx", "-y", "pskill9/web-search"]
+    }
+  }
+}

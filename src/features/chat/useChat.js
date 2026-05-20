@@ -1,84 +1,111 @@
-import { useState } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { API_BASE } from "../../api/base";
 
 export const useChat = (user) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
   const [activeChatId, setActiveChatId] = useState(null);
+  const streamRef = useRef(null);
 
-  const loadChat = async (chatId) => {
-    if (!user) return;
+  useEffect(() => {
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.cancel();
+      }
+    };
+  }, []);
 
-    const token = await user.getIdToken();
+  const loadChat = useCallback(
+    async (chatId) => {
+      if (!user) return;
+      setError(null);
+      try {
+        const token = await user.getIdToken();
+        const res = await fetch(`${API_BASE}/chat/${chatId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) throw new Error("Failed to load chat");
+        const data = await res.json();
+        setMessages(data);
+        setActiveChatId(chatId);
+      } catch (err) {
+        setError(err.message);
+      }
+    },
+    [user]
+  );
 
-    const res = await fetch(`${API_BASE}/chat/${chatId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+  const sendMessage = useCallback(
+    async (prompt) => {
+      if (!user) return;
+      setError(null);
+      setLoading(true);
 
-    const data = await res.json();
-    setMessages(data);
-    setActiveChatId(chatId);
-  };
+      const token = await user.getIdToken();
 
-  const sendMessage = async (prompt) => {
-    if (!user) return;
+      const userMessage = { role: "user", content: prompt };
+      setMessages((prev) => [...prev, userMessage]);
 
-    setLoading(true);
+      const endpoint = activeChatId
+        ? `${API_BASE}/chat/${activeChatId}/continue`
+        : `${API_BASE}/chat/new`;
 
-    const token = await user.getIdToken();
+      try {
+        const response = await fetch(endpoint, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ prompt }),
+        });
 
-    setMessages((prev) => [...prev, { role: "user", content: prompt }]);
+        if (!response.ok) throw new Error("Failed to send message");
 
-    const endpoint = activeChatId
-      ? `${API_BASE}/chat/${activeChatId}/continue`
-      : `${API_BASE}/chat/new`;
+        const newChatId = response.headers.get("X-Chat-Id");
+        if (newChatId) setActiveChatId(newChatId);
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ prompt }),
-    });
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder("utf-8");
+        let assistantMessage = "";
 
-    // NEW: get chatId from response header
-    const newChatId = response.headers.get("X-Chat-Id");
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-    if (newChatId) {
-      setActiveChatId(newChatId);
-    }
+          const chunk = decoder.decode(value, { stream: true });
+          assistantMessage += chunk;
 
-    const reader = response.body.getReader();
-    const decoder = new TextDecoder("utf-8");
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            if (last?.role === "streaming") {
+              const updated = [...prev];
+              updated[updated.length - 1] = {
+                role: "streaming",
+                content: assistantMessage,
+              };
+              return updated;
+            }
+            return [
+              ...prev,
+              { role: "streaming", content: assistantMessage },
+            ];
+          });
+        }
 
-    let assistantMessage = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      const chunk = decoder.decode(value);
-      assistantMessage += chunk;
-
-      setMessages((prev) => {
-        const withoutStreaming = prev.filter((m) => m.role !== "streaming");
-        return [
-          ...withoutStreaming,
-          { role: "streaming", content: assistantMessage },
-        ];
-      });
-    }
-
-    setMessages((prev) => [
-      ...prev.filter((m) => m.role !== "streaming"),
-      { role: "assistant", content: assistantMessage },
-    ]);
-
-    setLoading(false);
-  };
+        setMessages((prev) => {
+          const filtered = prev.filter((m) => m.role !== "streaming");
+          return [...filtered, { role: "assistant", content: assistantMessage }];
+        });
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [user, activeChatId]
+  );
 
   return {
     messages,
@@ -87,5 +114,6 @@ export const useChat = (user) => {
     activeChatId,
     setActiveChatId,
     loading,
+    error,
   };
 };
