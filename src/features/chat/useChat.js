@@ -10,17 +10,42 @@ export const useChat = (user) => {
   const loadChat = async (chatId) => {
     if (!user) return;
 
-    const token = await user.getIdToken();
+    if (!chatId) {
+      setMessages([]);
+      setActiveChatId(null);
+      return;
+    }
 
-    const res = await fetch(`${API_BASE}/chat/${chatId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    setLoading(true);
+    setError(null);
 
-    const data = await res.json();
-    setMessages(data);
-    setActiveChatId(chatId);
+    try {
+      const token = await user.getIdToken();
+
+      const res = await fetch(`${API_BASE}/chat/${chatId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to load chat");
+      }
+
+      const data = await res.json();
+      setMessages(data);
+      setActiveChatId(chatId);
+    } catch (err) {
+      console.error("Error loading chat:", err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createNewChat = () => {
+    setMessages([]);
+    setActiveChatId(null);
   };
 
   const sendMessage = async (prompt) => {
@@ -101,6 +126,7 @@ export const useChat = (user) => {
     messages,
     sendMessage,
     loadChat,
+    createNewChat,
     activeChatId,
     setActiveChatId,
     loading,

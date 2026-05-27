@@ -3,15 +3,24 @@
   "mcp": {
     "filesystem": {
       "type": "local",
+      "enabled": true,
       "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."]
-    },
-    "tailwind": {
-      "type": "local",
-      "command": ["npx", "-y", "tailwindcss-mcp-server"]
     },
     "websearch": {
       "type": "local",
-      "command": ["npx", "-y", "pskill9/web-search"]
+      "enabled": true,
+      "command": ["npx", "git+https://github.com/pskill9/web-search"]
+    },
+    "tailwind": {
+      "type": "local",
+      "enabled": true,
+      "command": ["npx", "-y", "tailwindcss-mcp-server"]
     }
+  },
+  "permission": {
+    "filesystem_*": "ask",
+    "websearch_*": "allow",
+    "bash": "ask",
+    "edit": "ask"
   }
 }

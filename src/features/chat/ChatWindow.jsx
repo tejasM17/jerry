@@ -81,6 +81,7 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-6">
+        {!hasMessages && !loading && <EmptyState />}
         {Array.isArray(messages) &&
           messages.map((msg, index) => (
             <MessageBubble key={index} message={msg} />
@@ -103,6 +104,7 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
             </div>
           </div>
         )}
+        <div ref={bottomRef} className="h-px" />
       </div>
 
       <ScrollToBottom

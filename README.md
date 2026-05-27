@@ -31,13 +31,16 @@ cd jerry
 
 ### 2. Environment Setup
 
-Create a `.env.development` file in the root directory and add your Firebase credentials. You can use `.env.example` as a template.
+Create a `.env.development` file (or update the existing one) in the root directory. You **must** provide your own Firebase credentials for authentication to work.
+
+1.  Go to the [Firebase Console](https://console.firebase.google.com/).
+2.  Create a new project (or select an existing one).
+3.  Add a "Web App" to your project.
+4.  Copy the `firebaseConfig` values into your `.env.development` file:
 
 ```bash
-# Example .env.development
 VITE_API_BASE_URL=http://localhost:5000/api
 
-# Firebase Configuration
 VITE_FIREBASE_API_KEY=your_api_key
 VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
 VITE_FIREBASE_PROJECT_ID=your_project_id
@@ -45,6 +48,8 @@ VITE_FIREBASE_STORAGE_BUCKET=your_project.appspot.com
 VITE_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
 VITE_FIREBASE_APP_ID=your_app_id
 ```
+
+> **Note:** The `VITE_API_BASE_URL` should point to your local Jerry API server. Ensure the backend is running before testing chat features.
 
 ### 3. Install & Run
 
