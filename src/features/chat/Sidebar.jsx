@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import ProfileMenu from "../../const/ProfileMenu";
 import JerryIcon from "../../assets/jerry.svg";
 
@@ -12,6 +12,10 @@ import {
   FiImage,
   FiGrid,
   FiCode,
+  FiMoreVertical,
+  FiEdit2,
+  FiTrash2,
+  FiCheck,
 } from "react-icons/fi";
 import { useAuth } from "../auth/AuthProvider";
 import { API_BASE } from "../../api/base";
@@ -39,7 +43,11 @@ const mobileSlideVariants = {
 const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
   const [chats, setChats] = useState([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [editingChatId, setEditingChatId] = useState(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [menuOpenId, setMenuOpenId] = useState(null);
   const { user } = useAuth();
+  const editInputRef = useRef(null);
 
   const handleNewChat = useCallback(() => {
     if (typeof chat.newChat === "function") chat.newChat();
@@ -67,6 +75,36 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
     if (!user) return;
     fetchChats();
   }, [user, chat.activeChatId, fetchChats]);
+
+  useEffect(() => {
+    if (editingChatId && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingChatId]);
+
+  const handleRename = async (chatId) => {
+    if (!editTitle.trim()) {
+      setEditingChatId(null);
+      return;
+    }
+    const success = await chat.renameChat(chatId, editTitle);
+    if (success) {
+      setChats((prev) =>
+        prev.map((c) => (c.id === chatId ? { ...c, title: editTitle } : c))
+      );
+    }
+    setEditingChatId(null);
+  };
+
+  const handleDelete = async (chatId) => {
+    if (window.confirm("Are you sure you want to delete this chat?")) {
+      const success = await chat.deleteChat(chatId);
+      if (success) {
+        setChats((prev) => prev.filter((c) => c.id !== chatId));
+        if (menuOpenId === chatId) setMenuOpenId(null);
+      }
+    }
+  };
 
   const sidebarContent = (
     <div className="flex flex-col h-full">
@@ -162,31 +200,78 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
               </div>
               <div className="space-y-0.5">
                 {Array.isArray(chats) &&
-                  chats.slice(0, 8).map((item) => (
+                  chats.map((item) => (
                     <div
                       key={item.id}
-                      role="button"
-                      tabIndex={0}
-                      onClick={() => {
-                        chat.loadChat(item.id);
-                        setSidebarOpen(false);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          chat.loadChat(item.id);
-                          setSidebarOpen(false);
-                        }
-                      }}
-                      aria-label={`Open chat: ${item.title || "New conversation"}`}
-                      className="group flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[var(--surface-elevated)] cursor-pointer text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all duration-200"
+                      className={`group relative flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-sm transition-all duration-200 ${
+                        chat.activeChatId === item.id
+                          ? "bg-[var(--surface-elevated)] text-[var(--text-primary)]"
+                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
+                      }`}
                     >
                       <FiMessageSquare
                         size={16}
                         className="text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)] shrink-0 transition-colors"
                       />
-                      <span className="truncate">
-                        {item.title || "New conversation"}
-                      </span>
+                      
+                      {editingChatId === item.id ? (
+                        <div className="flex-1 flex items-center gap-1 min-w-0">
+                          <input
+                            ref={editInputRef}
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            onBlur={() => handleRename(item.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleRename(item.id);
+                              if (e.key === "Escape") setEditingChatId(null);
+                            }}
+                            className="flex-1 bg-transparent border-none outline-none text-sm p-0 min-w-0"
+                          />
+                          <button
+                            onMouseDown={(e) => e.preventDefault()} // Prevent blur
+                            onClick={() => handleRename(item.id)}
+                            className="text-green-500 hover:text-green-400 p-1"
+                          >
+                            <FiCheck size={14} />
+                          </button>
+                        </div>
+                      ) : (
+                        <>
+                          <span 
+                            className="truncate flex-1"
+                            onClick={() => {
+                              chat.loadChat(item.id);
+                              setSidebarOpen(false);
+                            }}
+                          >
+                            {item.title || "New conversation"}
+                          </span>
+
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingChatId(item.id);
+                                setEditTitle(item.title || "");
+                              }}
+                              className="p-1 hover:text-[var(--text-primary)] transition-colors"
+                              title="Rename"
+                            >
+                              <FiEdit2 size={14} />
+                            </button>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(item.id);
+                              }}
+                              className="p-1 hover:text-red-400 transition-colors"
+                              title="Delete"
+                            >
+                              <FiTrash2 size={14} />
+                            </button>
+                          </div>
+                        </>
+                      )}
                     </div>
                   ))}
               </div>

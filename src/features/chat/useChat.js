@@ -122,11 +122,54 @@ export const useChat = (user) => {
     }
   };
 
+  const renameChat = async (chatId, newTitle) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch(`${API_BASE}/chat/${chatId}/rename`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ title: newTitle }),
+      });
+      if (!res.ok) throw new Error("Failed to rename chat");
+      return true;
+    } catch (err) {
+      console.error("Error renaming chat:", err);
+      return false;
+    }
+  };
+
+  const deleteChat = async (chatId) => {
+    if (!user) return;
+    try {
+      const token = await user.getIdToken();
+      const res = await fetch(`${API_BASE}/chat/${chatId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) throw new Error("Failed to delete chat");
+      if (activeChatId === chatId) {
+        createNewChat();
+      }
+      return true;
+    } catch (err) {
+      console.error("Error deleting chat:", err);
+      return false;
+    }
+  };
+
   return {
     messages,
     sendMessage,
     loadChat,
     createNewChat,
+    renameChat,
+    deleteChat,
     activeChatId,
     setActiveChatId,
     loading,
