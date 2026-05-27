@@ -88,17 +88,17 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
           ))}
         {loading && !messages.some((m) => m.role === "streaming") && (
           <div className="flex justify-start">
-            <div className="bg-[#212121] text-gray-200 px-4 py-3 rounded-lg flex space-x-1 items-center">
+            <div className="bg-zinc-900/50 text-zinc-400 px-4 py-3 rounded-2xl flex space-x-1.5 items-center ring-1 ring-white/5">
               <div
-                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
                 style={{ animationDelay: "0s" }}
               ></div>
               <div
-                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
                 style={{ animationDelay: "0.2s" }}
               ></div>
               <div
-                className="w-2 h-2 bg-gray-500 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
                 style={{ animationDelay: "0.4s" }}
               ></div>
             </div>

@@ -1,7 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from "react";
 import ProfileMenu from "../../const/ProfileMenu";
 import JerryIcon from "../../assets/jerry.svg";
-
 import {
   FiX,
   FiSearch,
@@ -12,7 +11,6 @@ import {
   FiImage,
   FiGrid,
   FiCode,
-  FiMoreVertical,
   FiEdit2,
   FiTrash2,
   FiCheck,
@@ -23,29 +21,17 @@ import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { icon: FiPlus, label: "New chat", action: "newChat" },
-  { icon: FiSearch, label: "Search chats" },
-  { icon: FiImage, label: "Images" },
-  { icon: FiGrid, label: "Apps" },
-  { icon: FiCode, label: "Codex" },
+  { icon: FiSearch, label: "Search" },
+  { icon: FiImage, label: "Assets" },
+  { icon: FiGrid, label: "Extensions" },
+  { icon: FiCode, label: "Developer" },
 ];
-
-const contentVariants = {
-  visible: { opacity: 1, transition: { delay: 0.1, duration: 0.2 } },
-  hidden: { opacity: 0, transition: { duration: 0.1 } },
-};
-
-const mobileSlideVariants = {
-  hidden: { x: "-100%" },
-  visible: { x: 0, transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] } },
-  exit: { x: "-100%", transition: { duration: 0.25, ease: [0.25, 0.1, 0.25, 1] } },
-};
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
   const [chats, setChats] = useState([]);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [editingChatId, setEditingChatId] = useState(null);
   const [editTitle, setEditTitle] = useState("");
-  const [menuOpenId, setMenuOpenId] = useState(null);
   const { user } = useAuth();
   const editInputRef = useRef(null);
 
@@ -53,7 +39,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
     if (typeof chat.newChat === "function") chat.newChat();
     else if (typeof chat.createNewChat === "function") chat.createNewChat();
     else if (typeof chat.loadChat === "function") chat.loadChat(null);
-    setSidebarOpen(false);
+    if (window.innerWidth < 768) setSidebarOpen(false);
   }, [chat, setSidebarOpen]);
 
   const fetchChats = useCallback(async () => {
@@ -101,230 +87,194 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
       const success = await chat.deleteChat(chatId);
       if (success) {
         setChats((prev) => prev.filter((c) => c.id !== chatId));
-        if (menuOpenId === chatId) setMenuOpenId(null);
       }
     }
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full">
-      {/* Mobile close */}
-      <div className="md:hidden flex items-center justify-end p-4 border-b border-[var(--border-subtle)]">
-        <button
-          onClick={() => setSidebarOpen(false)}
-          aria-label="Close sidebar"
-          className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1 rounded-lg hover:bg-[var(--surface-elevated)]"
-        >
-          <FiX size={20} />
-        </button>
-      </div>
-
-      {/* Logo + collapse */}
-      <div className="p-4 flex items-center justify-between border-b border-[var(--border-subtle)] min-h-[57px]">
+    <div className="flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+      {/* 1. Header Section */}
+      <div className={`p-4 flex items-center shrink-0 border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 ${isCollapsed ? "justify-center" : "justify-between"}`}>
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 bg-white/[0.06] rounded-xl flex items-center justify-center shrink-0 ring-1 ring-white/[0.06]">
-            <img src={JerryIcon} alt="" className="w-5 h-5" />
+          <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center shrink-0">
+            <img src={JerryIcon} alt="" className="w-5 h-5 invert dark:invert-0" />
           </div>
-          <AnimatePresence initial={false}>
-            {!isCollapsed && (
-              <motion.span
-                variants={contentVariants}
-                initial="hidden"
-                animate="visible"
-                exit="hidden"
-                className="text-base font-semibold tracking-tight text-nowrap"
-              >
-                by Tejas
-              </motion.span>
-            )}
-          </AnimatePresence>
+          {!isCollapsed && (
+            <motion.span 
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="font-semibold tracking-tight whitespace-nowrap"
+            >
+              Jerry AI
+            </motion.span>
+          )}
         </div>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className="hidden md:flex items-center justify-center w-7 h-7 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] rounded-lg transition-all duration-200"
+          className="hidden md:flex p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors text-zinc-500"
         >
-          {isCollapsed ? <FiChevronRight size={16} /> : <FiChevronLeft size={16} />}
+          {isCollapsed ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
+        </button>
+        <button
+          onClick={() => setSidebarOpen(false)}
+          className="md:hidden p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors text-zinc-500"
+        >
+          <FiX size={18} />
         </button>
       </div>
 
-      {/* Nav items */}
-      <nav className="flex-1 overflow-y-auto py-3 no-scrollbar">
-        <div className="space-y-0.5 px-2">
+      {/* 2. Navigation & History Section */}
+      <div className="flex-1 overflow-y-auto no-scrollbar py-4">
+        {/* Main Nav Items */}
+        <div className="px-3 space-y-1 mb-6">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isNewChat = item.action === "newChat";
             return (
-              <div
+              <button
                 key={item.label}
-                role="button"
-                tabIndex={0}
                 onClick={isNewChat ? handleNewChat : undefined}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && isNewChat) handleNewChat();
-                }}
-                aria-label={item.label}
-                className={`flex items-center ${
-                  isCollapsed ? "justify-center" : "gap-3 px-3"
-                } py-2 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)] cursor-pointer transition-all duration-200 active:scale-[0.98]`}
+                className={`group flex items-center w-full rounded-lg transition-all duration-300 ease-in-out hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
+                  isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
+                }`}
               >
-                <Icon size={16} className="shrink-0" />
-                <AnimatePresence initial={false}>
-                  {!isCollapsed && (
-                    <motion.span
-                      variants={contentVariants}
-                      initial="hidden"
-                      animate="visible"
-                      exit="hidden"
-                    >
-                      {item.label}
-                    </motion.span>
-                  )}
-                </AnimatePresence>
-              </div>
+                <Icon size={18} className="shrink-0 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                {!isCollapsed && (
+                  <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                    {item.label}
+                  </span>
+                )}
+              </button>
             );
           })}
         </div>
 
-        <AnimatePresence initial={false}>
+        {/* History Items */}
+        <div className="px-3 space-y-1">
           {!isCollapsed && (
-            <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.2 }}
-              className="mt-6 px-2 overflow-hidden"
-            >
-              <div className="px-3 mb-2 text-[11px] font-semibold text-[var(--text-tertiary)] uppercase tracking-widest">
-                Recent
-              </div>
-              <div className="space-y-0.5">
-                {Array.isArray(chats) &&
-                  chats.map((item) => (
-                    <div
-                      key={item.id}
-                      className={`group relative flex items-center gap-3 px-3 py-2 rounded-xl cursor-pointer text-sm transition-all duration-200 ${
-                        chat.activeChatId === item.id
-                          ? "bg-[var(--surface-elevated)] text-[var(--text-primary)]"
-                          : "text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--surface-elevated)]"
-                      }`}
-                    >
-                      <FiMessageSquare
-                        size={16}
-                        className="text-[var(--text-tertiary)] group-hover:text-[var(--text-secondary)] shrink-0 transition-colors"
-                      />
-                      
-                      {editingChatId === item.id ? (
-                        <div className="flex-1 flex items-center gap-1 min-w-0">
-                          <input
-                            ref={editInputRef}
-                            value={editTitle}
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            onBlur={() => handleRename(item.id)}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") handleRename(item.id);
-                              if (e.key === "Escape") setEditingChatId(null);
-                            }}
-                            className="flex-1 bg-transparent border-none outline-none text-sm p-0 min-w-0"
-                          />
+            <h3 className="px-3 mb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+              Recent Activity
+            </h3>
+          )}
+          <div className="space-y-0.5">
+            {chats.map((item) => (
+              <div
+                key={item.id}
+                className={`group relative flex items-center rounded-lg transition-all duration-300 ease-in-out cursor-pointer ${
+                  chat.activeChatId === item.id
+                    ? "bg-zinc-200 dark:bg-zinc-800"
+                    : "hover:bg-zinc-100 dark:hover:bg-zinc-900"
+                } ${isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"}`}
+              >
+                {/* Collapsed View: Show Icons for history if requested, otherwise generic icon */}
+                {isCollapsed ? (
+                  <div className="relative flex items-center justify-center w-full h-8" onClick={() => chat.loadChat(item.id)}>
+                    <FiMessageSquare size={18} className="text-zinc-500 group-hover:opacity-0 transition-opacity" />
+                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }} 
+                        className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                        title="Rename"
+                      >
+                        <FiEdit2 size={13} />
+                      </button>
+                      <button 
+                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} 
+                        className="p-1 text-zinc-400 hover:text-red-500"
+                        title="Delete"
+                      >
+                        <FiTrash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <FiMessageSquare size={16} className="shrink-0 text-zinc-400" />
+                    {editingChatId === item.id ? (
+                      <div className="flex-1 flex items-center gap-1 min-w-0">
+                        <input
+                          ref={editInputRef}
+                          value={editTitle}
+                          onChange={(e) => setEditTitle(e.target.value)}
+                          onBlur={() => handleRename(item.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleRename(item.id);
+                            if (e.key === "Escape") setEditingChatId(null);
+                          }}
+                          className="flex-1 bg-transparent border-none outline-none text-sm p-0 min-w-0 font-medium"
+                        />
+                        <button onMouseDown={(e) => e.preventDefault()} onClick={() => handleRename(item.id)} className="text-green-500 p-0.5">
+                          <FiCheck size={14} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex-1 flex items-center justify-between min-w-0">
+                        <span
+                          className="text-sm truncate font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100"
+                          onClick={() => { chat.loadChat(item.id); if (window.innerWidth < 768) setSidebarOpen(false); }}
+                        >
+                          {item.title || "Untitled Chat"}
+                        </span>
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
                           <button
-                            onMouseDown={(e) => e.preventDefault()} // Prevent blur
-                            onClick={() => handleRename(item.id)}
-                            className="text-green-500 hover:text-green-400 p-1"
+                            onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }}
+                            className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
                           >
-                            <FiCheck size={14} />
+                            <FiEdit2 size={13} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
+                            className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+                          >
+                            <FiTrash2 size={13} />
                           </button>
                         </div>
-                      ) : (
-                        <>
-                          <span 
-                            className="truncate flex-1"
-                            onClick={() => {
-                              chat.loadChat(item.id);
-                              setSidebarOpen(false);
-                            }}
-                          >
-                            {item.title || "New conversation"}
-                          </span>
-
-                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setEditingChatId(item.id);
-                                setEditTitle(item.title || "");
-                              }}
-                              className="p-1 hover:text-[var(--text-primary)] transition-colors"
-                              title="Rename"
-                            >
-                              <FiEdit2 size={14} />
-                            </button>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDelete(item.id);
-                              }}
-                              className="p-1 hover:text-red-400 transition-colors"
-                              title="Delete"
-                            >
-                              <FiTrash2 size={14} />
-                            </button>
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  ))}
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </nav>
-
-      {/* Profile */}
-      <div className="p-3 border-t border-[var(--border-subtle)]">
-        {isCollapsed ? (
-          <div className="flex justify-center">
-            <div className="w-9 h-9 rounded-full bg-[var(--surface-elevated)] flex items-center justify-center ring-1 ring-white/[0.06]">
-              <span className="text-sm font-medium text-[var(--text-secondary)]">
-                {user?.displayName?.charAt(0)?.toUpperCase() || "U"}
-              </span>
-            </div>
+            ))}
           </div>
-        ) : (
-          <ProfileMenu user={user} />
-        )}
+        </div>
+      </div>
+
+      {/* 3. Footer Section (Profile) */}
+      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 shrink-0">
+        <div className={`flex items-center transition-all duration-300 ${isCollapsed ? "justify-center" : "gap-3"}`}>
+          <div className="flex-1 min-w-0">
+             <ProfileMenu user={user} isCollapsed={isCollapsed} />
+          </div>
+        </div>
       </div>
     </div>
   );
 
   return (
     <>
-      {/* Mobile sidebar (animated slide) */}
+      {/* Mobile Overlay */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.aside
-            variants={mobileSlideVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            className="md:hidden fixed inset-y-0 left-0 z-50 w-[260px] bg-[var(--surface-overlay)] border-r border-[var(--border-subtle)]"
-            aria-label="Chat sidebar"
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", damping: 25, stiffness: 200 }}
+            className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 md:hidden shadow-2xl"
           >
             {sidebarContent}
           </motion.aside>
         )}
       </AnimatePresence>
 
-      {/* Desktop sidebar (always visible, collapsible width) */}
-      <motion.aside
-        initial={false}
-        animate={{ width: isCollapsed ? 68 : 260 }}
-        transition={{ duration: 0.3, ease: [0.25, 0.1, 0.25, 1] }}
-        className="hidden md:flex shrink-0 bg-[var(--surface-overlay)] border-r border-[var(--border-subtle)] overflow-hidden"
-        aria-label="Chat sidebar"
+      {/* Desktop Persistent Sidebar */}
+      <aside
+        className={`hidden md:flex flex-col shrink-0 h-screen transition-all duration-300 ease-in-out border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 ${
+          isCollapsed ? "w-16" : "w-64"
+        }`}
       >
         {sidebarContent}
-      </motion.aside>
+      </aside>
     </>
   );
 };
