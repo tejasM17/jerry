@@ -48,14 +48,17 @@ export const useChat = (user) => {
     setActiveChatId(null);
   };
 
-  const sendMessage = async (prompt) => {
+  const sendMessage = async (prompt, attachments = []) => {
     if (!user) return;
 
     setLoading(true);
 
     const token = await user.getIdToken();
 
-    setMessages((prev) => [...prev, { role: "user", content: prompt }]);
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", content: prompt, attachments },
+    ]);
 
     try {
       const endpoint = activeChatId
@@ -68,7 +71,7 @@ export const useChat = (user) => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ prompt }),
+        body: JSON.stringify({ prompt, attachments }),
       });
 
       if (!response.ok) {
@@ -117,6 +120,71 @@ export const useChat = (user) => {
           error: true,
         },
       ]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const editMessage = async (messageId, newPrompt) => {
+    if (!user || !activeChatId) return;
+
+    setLoading(true);
+    const token = await user.getIdToken();
+
+    // Optimistically slice messages
+    setMessages((prev) => {
+      const index = prev.findIndex(
+        (m) => m.id === messageId || m._id === messageId
+      );
+      if (index === -1) return prev;
+      const sliced = prev.slice(0, index);
+      return [...sliced, { ...prev[index], content: newPrompt }];
+    });
+
+    try {
+      const response = await fetch(
+        `${API_BASE}/chat/${activeChatId}/edit/${messageId}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ prompt: newPrompt }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to edit message");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder("utf-8");
+      let assistantMessage = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        assistantMessage += chunk;
+
+        setMessages((prev) => {
+          const withoutStreaming = prev.filter((m) => m.role !== "streaming");
+          return [
+            ...withoutStreaming,
+            { role: "streaming", content: assistantMessage },
+          ];
+        });
+      }
+
+      setMessages((prev) => [
+        ...prev.filter((m) => m.role !== "streaming"),
+        { role: "assistant", content: assistantMessage },
+      ]);
+    } catch (error) {
+      console.error("Error editing message:", error);
+      setError(error.message);
     } finally {
       setLoading(false);
     }

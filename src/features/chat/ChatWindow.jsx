@@ -41,7 +41,7 @@ const ScrollToBottom = ({ onClick, visible }) => {
 };
 
 const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
-  const { messages, sendMessage, loading } = chat;
+  const { messages, sendMessage, editMessage, loading } = chat;
   const scrollRef = useRef(null);
   const bottomRef = useRef(null);
   const [showScrollBtn, setShowScrollBtn] = useState(false);
@@ -84,7 +84,7 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
         {!hasMessages && !loading && <EmptyState />}
         {Array.isArray(messages) &&
           messages.map((msg, index) => (
-            <MessageBubble key={index} message={msg} />
+            <MessageBubble key={index} message={msg} onEdit={editMessage} />
           ))}
         {loading && !messages.some((m) => m.role === "streaming") && (
           <div className="flex justify-start">

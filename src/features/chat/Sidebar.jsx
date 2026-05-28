@@ -170,7 +170,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
                 {isCollapsed ? (
                   <div className="relative flex items-center justify-center w-full h-8" onClick={() => chat.loadChat(item.id)}>
                     <FiMessageSquare size={18} className="text-zinc-500 group-hover:opacity-0 transition-opacity" />
-                    <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
+                    <div className="absolute inset-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }} 
                         className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
@@ -215,7 +215,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
                         >
                           {item.title || "Untitled Chat"}
                         </span>
-                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                           <button
                             onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }}
                             className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
