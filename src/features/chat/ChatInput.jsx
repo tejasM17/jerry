@@ -36,12 +36,12 @@ const AttachmentMenu = ({ isOpen, onClose, onUploadClick }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute bottom-full mb-3 left-0 z-50 w-56 bg-zinc-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-1.5"
+            className="absolute bottom-full mb-3 left-0 z-50 w-56 bg-neutral-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-1.5"
           >
             {menuItems.map((item, index) => (
               <button
                 key={index}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-[14px] text-zinc-300 hover:bg-white/5 hover:text-white transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors text-left"
                 onClick={item.onClick || onClose}
               >
                 <span className="text-zinc-400">{item.icon}</span>
@@ -148,8 +148,8 @@ const ChatInput = ({ onSend, loading }) => {
   }, [text, handleInput]);
 
   return (
-    <div className="px-3 md:px-4 pb-4 pt-1 bg-[var(--surface)]">
-      <div className="max-w-4xl mx-auto">
+    <div className="px-3 md:px-4 pb-3 md:pb-4 pt-1">
+      <div className="max-w-3xl mx-auto">
         {/* Attachment Previews */}
         <AnimatePresence>
           {attachments.length > 0 && (
@@ -213,7 +213,7 @@ const ChatInput = ({ onSend, loading }) => {
           )}
         </AnimatePresence>
 
-        <div className="relative flex items-end bg-zinc-800/50 rounded-[28px] pl-2.5 pr-2 py-2.5 ring-1 ring-white/5 focus-within:ring-white/10 transition-all duration-300">
+        <div className="relative flex items-end bg-[#2f2f2f] rounded-2xl pl-3 pr-2 py-2.5 ring-1 ring-white/10 focus-within:ring-white/20 transition-all duration-200">
           <input
             type="file"
             ref={fileInputRef}
@@ -249,7 +249,7 @@ const ChatInput = ({ onSend, loading }) => {
             placeholder="Ask anything"
             rows={1}
             aria-label="Message input"
-            className="flex-1 bg-transparent resize-none outline-none text-zinc-100 px-3 py-1.5 max-h-[200px] leading-relaxed text-[15px] placeholder-zinc-500 no-scrollbar"
+            className="flex-1 bg-transparent resize-none outline-none text-[var(--text-primary)] px-3 py-1.5 max-h-[200px] leading-relaxed text-base placeholder-[var(--text-tertiary)] no-scrollbar"
             style={{ height: "auto" }}
           />
 
@@ -307,7 +307,7 @@ const ChatInput = ({ onSend, loading }) => {
             </AnimatePresence>
           </div>
         </div>
-        <p className="text-center text-[11px] text-zinc-500 mt-2.5 select-none font-medium tracking-tight">
+        <p className="text-center text-[11px] text-[var(--text-tertiary)] mt-2.5 select-none font-medium tracking-tight">
           Jerry can make mistakes. Check important info.
         </p>
       </div>

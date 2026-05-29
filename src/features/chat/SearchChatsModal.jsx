@@ -161,13 +161,13 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
               ) : (
                 <>
                   {/* New Chat Option */}
-                  <button
-                    onClick={handleNewChat}
-                    className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-white/5"
-                  >
-                    <FiPlus size={16} className="shrink-0 text-[var(--text-tertiary)]" />
-                    <span className="text-sm text-[var(--text-secondary)]">New chat</span>
-                  </button>
+                    <button
+                      onClick={handleNewChat}
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-neutral-800"
+                    >
+                      <FiPlus size={16} className="shrink-0 text-[var(--text-tertiary)]" />
+                      <span className="text-sm text-[var(--text-secondary)]">New chat</span>
+                    </button>
 
                   {/* Section Heading */}
                   {!isSearching && results.length > 0 && (
@@ -182,7 +182,7 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
                       <button
                         key={item.id}
                         onClick={() => handleSelect(item.id)}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-white/5"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-neutral-800"
                       >
                         <FiMessageSquare size={16} className="shrink-0 text-[var(--text-tertiary)]" />
                         <span className="text-sm text-[var(--text-secondary)] truncate">

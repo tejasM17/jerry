@@ -80,31 +80,33 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-6 space-y-6">
-        {!hasMessages && !loading && <EmptyState />}
-        {Array.isArray(messages) &&
-          messages.map((msg, index) => (
-            <MessageBubble key={index} message={msg} onEdit={editMessage} />
-          ))}
-        {loading && !messages.some((m) => m.role === "streaming") && (
-          <div className="flex justify-start">
-            <div className="bg-zinc-900/50 text-zinc-400 px-4 py-3 rounded-2xl flex space-x-1.5 items-center ring-1 ring-white/5">
-              <div
-                className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0s" }}
-              ></div>
-              <div
-                className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0.2s" }}
-              ></div>
-              <div
-                className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
-                style={{ animationDelay: "0.4s" }}
-              ></div>
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-3xl mx-auto p-4 md:p-6 space-y-6">
+          {!hasMessages && !loading && <EmptyState />}
+          {Array.isArray(messages) &&
+            messages.map((msg, index) => (
+              <MessageBubble key={index} message={msg} onEdit={editMessage} />
+            ))}
+          {loading && !messages.some((m) => m.role === "streaming") && (
+            <div className="flex justify-start">
+              <div className="bg-zinc-900/50 text-zinc-400 px-4 py-3 rounded-2xl flex space-x-1.5 items-center ring-1 ring-white/5">
+                <div
+                  className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0s" }}
+                ></div>
+                <div
+                  className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.2s" }}
+                ></div>
+                <div
+                  className="w-1.5 h-1.5 bg-zinc-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0.4s" }}
+                ></div>
+              </div>
             </div>
-          </div>
-        )}
-        <div ref={bottomRef} className="h-px" />
+          )}
+          <div ref={bottomRef} className="h-px" />
+        </div>
       </div>
 
       <ScrollToBottom
@@ -115,8 +117,13 @@ const ChatWindow = ({ sidebarOpen, setSidebarOpen, chat }) => {
         }}
       />
 
-      {/* Input */}
-      <ChatInput onSend={sendMessage} loading={loading} />
+      {/* Gradient fade + Input */}
+      <div className="relative">
+        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-[var(--surface)] via-[var(--surface)]/60 to-transparent pointer-events-none z-10" />
+        <div className="relative z-20">
+          <ChatInput onSend={sendMessage} loading={loading} />
+        </div>
+      </div>
     </div>
   );
 };
