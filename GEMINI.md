@@ -17,14 +17,15 @@ Jerry is a modern, responsive AI chat application built with **React 19**, **Vit
 
 ## 🏗️ Architecture & Conventions
 1.  **Feature-Based Folders**: Group components, hooks, and logic related to a specific feature (e.g., `auth`, `chat`) within `src/features/`.
-2.  **API Requests**: Always use the `API_BASE` constant from `src/api/base.js`. Ensure requests include the Firebase Bearer token in the `Authorization` header.
-3.  **UI Components**: Prioritize accessibility and responsive design. Use `react-icons` and `framer-motion` for consistency.
-4.  **Chat Logic**: The `useChat` hook handles streaming, state management for messages, and interaction with the backend.
+2.  **Shared Components & Constants**: Global constants and shared UI elements (like `ProfileMenu.jsx`) are located in `src/const/` or `src/assets/`.
+3.  **API Requests**: Always use the `API_BASE` constant from `src/api/base.js`. Ensure requests include the Firebase Bearer token in the `Authorization` header.
+4.  **UI Components**: Prioritize accessibility and responsive design. Use `react-icons` and `framer-motion` for consistency.
+5.  **Chat Logic**: The `useChat` hook handles streaming, state management for messages, and interaction with the backend.
 
 ## 📍 Current Status
 - **Auth**: Login and Registration flows are implemented via `AuthProvider.jsx`.
-- **Chat**: Premium UI with dark streaming bubbles (`bg-zinc-900` for user), auto-expanding pill-shaped input bar (`bg-zinc-800`), and a glassmorphic attachment drop-up menu.
-- **UI/UX**: Modern dropup profile menu and attachment menu with smooth animations. Blinking cursor for real-time streaming feedback.
+- **Chat**: Premium UI with dark streaming bubbles (`bg-zinc-900` for user), auto-expanding pill-shaped input bar (`bg-zinc-800`), and a glassmorphic attachment drop-up menu. Supports **streaming message editing**, **chat renaming**, and **deletion**.
+- **UI/UX**: Modern dropup profile menu (`src/const/ProfileMenu.jsx`) and attachment menu with smooth animations. Blinking cursor for real-time streaming feedback.
 - **Routing**: Basic structure for `/`, `/login`, and `/register` is established.
 - **Styling**: Tailwind 4 is configured and used across the application.
 
