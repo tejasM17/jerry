@@ -94,12 +94,12 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
   };
 
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100">
+    <div className="flex flex-col h-full bg-[#171717] text-[var(--text-primary)]">
       {/* 1. Header Section */}
-      <div className={`p-4 flex items-center shrink-0 border-b border-zinc-200 dark:border-zinc-800 transition-all duration-300 ${isCollapsed ? "justify-center" : "justify-between"}`}>
+      <div className={`p-4 flex items-center shrink-0 border-b border-white/[0.06] transition-all duration-300 ${isCollapsed ? "justify-center" : "justify-between"}`}>
         <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-zinc-900 dark:bg-zinc-100 flex items-center justify-center shrink-0">
-            <img src={JerryIcon} alt="" className="w-5 h-5 invert dark:invert-0" />
+          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
+            <img src={JerryIcon} alt="" className="w-5 h-5 invert" />
           </div>
           {!isCollapsed && (
             <motion.span 
@@ -113,13 +113,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
         </div>
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:flex p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors text-zinc-500"
+          className="hidden md:flex p-1.5 hover:bg-neutral-800 rounded-md transition-colors text-zinc-500"
         >
           {isCollapsed ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
         </button>
         <button
           onClick={() => setSidebarOpen(false)}
-          className="md:hidden p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-800 rounded-md transition-colors text-zinc-500"
+          className="md:hidden p-1.5 hover:bg-neutral-800 rounded-md transition-colors text-zinc-500"
         >
           <FiX size={18} />
         </button>
@@ -137,13 +137,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
               <button
                 key={item.label}
                 onClick={isNewChat ? handleNewChat : isSearch ? () => setSearchOpen(true) : undefined}
-                className={`group flex items-center w-full rounded-lg transition-all duration-300 ease-in-out hover:bg-zinc-200 dark:hover:bg-zinc-800 ${
-                  isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
+                className={`group flex items-center w-full rounded-lg transition-all duration-200 hover:bg-neutral-800 ${
+                  isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
                 }`}
               >
-                <Icon size={18} className="shrink-0 text-zinc-500 group-hover:text-zinc-900 dark:group-hover:text-zinc-100 transition-colors" />
+                <Icon size={18} className="shrink-0 text-zinc-500 group-hover:text-zinc-200 transition-colors" />
                 {!isCollapsed && (
-                  <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100">
+                  <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-200">
                     {item.label}
                   </span>
                 )}
@@ -155,7 +155,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
         {/* History Items */}
         <div className="px-3 space-y-1">
           {!isCollapsed && (
-            <h3 className="px-3 mb-2 text-[10px] font-bold text-zinc-400 uppercase tracking-widest">
+            <h3 className="px-3 mb-2 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
               Recent Activity
             </h3>
           )}
@@ -163,20 +163,19 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
             {chats.map((item) => (
               <div
                 key={item.id}
-                className={`group relative flex items-center rounded-lg transition-all duration-300 ease-in-out cursor-pointer ${
+                className={`group relative flex items-center rounded-lg transition-all duration-200 cursor-pointer ${
                   chat.activeChatId === item.id
-                    ? "bg-zinc-200 dark:bg-zinc-800"
-                    : "hover:bg-zinc-100 dark:hover:bg-zinc-900"
-                } ${isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"}`}
+                    ? "bg-neutral-800"
+                    : "hover:bg-neutral-800/60"
+                } ${isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2.5"}`}
               >
-                {/* Collapsed View: Show Icons for history if requested, otherwise generic icon */}
                 {isCollapsed ? (
                   <div className="relative flex items-center justify-center w-full h-8" onClick={() => chat.loadChat(item.id)}>
                     <FiMessageSquare size={18} className="text-zinc-500 group-hover:opacity-0 transition-opacity" />
                     <div className="absolute inset-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
                       <button 
                         onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }} 
-                        className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100"
+                        className="p-1 text-zinc-400 hover:text-zinc-200"
                         title="Rename"
                       >
                         <FiEdit2 size={13} />
@@ -192,7 +191,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
                   </div>
                 ) : (
                   <>
-                    <FiMessageSquare size={16} className="shrink-0 text-zinc-400" />
+                    <FiMessageSquare size={16} className="shrink-0 text-zinc-500" />
                     {editingChatId === item.id ? (
                       <div className="flex-1 flex items-center gap-1 min-w-0">
                         <input
@@ -204,7 +203,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
                             if (e.key === "Enter") handleRename(item.id);
                             if (e.key === "Escape") setEditingChatId(null);
                           }}
-                          className="flex-1 bg-transparent border-none outline-none text-sm p-0 min-w-0 font-medium"
+                          className="flex-1 bg-transparent border-none outline-none text-sm p-0 min-w-0 font-medium text-[var(--text-primary)]"
                         />
                         <button onMouseDown={(e) => e.preventDefault()} onClick={() => handleRename(item.id)} className="text-green-500 p-0.5">
                           <FiCheck size={14} />
@@ -213,7 +212,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
                     ) : (
                       <div className="flex-1 flex items-center justify-between min-w-0">
                         <span
-                          className="text-sm truncate font-medium text-zinc-600 dark:text-zinc-400 group-hover:text-zinc-900 dark:group-hover:text-zinc-100"
+                          className="text-sm truncate font-medium text-zinc-400 group-hover:text-zinc-200"
                           onClick={() => { chat.loadChat(item.id); if (window.innerWidth < 768) setSidebarOpen(false); }}
                         >
                           {item.title || "Untitled Chat"}
@@ -221,13 +220,13 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
                         <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
                           <button
                             onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }}
-                            className="p-1 text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors"
+                            className="p-1 text-zinc-500 hover:text-zinc-200 transition-colors"
                           >
                             <FiEdit2 size={13} />
                           </button>
                           <button
                             onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                            className="p-1 text-zinc-400 hover:text-red-500 transition-colors"
+                            className="p-1 text-zinc-500 hover:text-red-500 transition-colors"
                           >
                             <FiTrash2 size={13} />
                           </button>
@@ -243,7 +242,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
       </div>
 
       {/* 3. Footer Section (Profile) */}
-      <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 shrink-0">
+      <div className="p-3 border-t border-white/[0.06] shrink-0">
         <div className={`flex items-center transition-all duration-300 ${isCollapsed ? "justify-center" : "gap-3"}`}>
           <div className="flex-1 min-w-0">
              <ProfileMenu user={user} isCollapsed={isCollapsed} />
@@ -270,7 +269,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-50 w-72 bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800 md:hidden shadow-2xl"
+            className="fixed inset-y-0 left-0 z-50 w-72 bg-[#171717] border-r border-white/[0.06] md:hidden shadow-2xl"
           >
             {sidebarContent}
           </motion.aside>
@@ -279,7 +278,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
 
       {/* Desktop Persistent Sidebar */}
       <aside
-        className={`hidden md:flex flex-col shrink-0 h-screen transition-all duration-300 ease-in-out border-r border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-950 ${
+        className={`hidden md:flex flex-col shrink-0 h-screen transition-all duration-300 ease-in-out border-r border-white/[0.06] bg-[#171717] ${
           isCollapsed ? "w-16" : "w-64"
         }`}
       >

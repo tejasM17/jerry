@@ -53,10 +53,10 @@ const MessageBubble = ({ message, onEdit }) => {
       className={`group flex w-full ${isUser ? "justify-end" : "justify-start"}`}
     >
       <div
-        className={`relative px-4 py-3 rounded-2xl break-words leading-relaxed text-[15px] ${
+        className={`relative px-4 py-3 rounded-2xl break-words leading-relaxed text-base ${
           isUser
-            ? "bg-zinc-900 ring-1 ring-white/5 text-zinc-100 ml-10 sm:ml-12"
-            : "text-zinc-200 mr-10 sm:mr-12 w-full"
+            ? "bg-zinc-800/50 ring-1 ring-white/5 text-[var(--text-primary)] ml-10 sm:ml-12"
+            : "text-[var(--text-primary)] mr-10 sm:mr-12 w-full"
         }`}
       >
         {isUser && !isEditing && (
@@ -83,12 +83,12 @@ const MessageBubble = ({ message, onEdit }) => {
                   autoFocus
                   value={editContent}
                   onChange={(e) => setEditContent(e.target.value)}
-                  className="w-full bg-zinc-800 text-zinc-100 rounded-xl p-3 outline-none ring-1 ring-white/10 focus:ring-[var(--accent)]/50 resize-none min-h-[120px] transition-all duration-300"
+                  className="w-full bg-neutral-800 text-[var(--text-primary)] rounded-xl p-3 outline-none ring-1 ring-white/10 focus:ring-[var(--accent)]/50 resize-none min-h-[120px] transition-all duration-300 text-lg"
                 />
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleEditSubmit}
-                    className="px-4 py-1.5 rounded-full bg-zinc-100 text-zinc-900 text-sm font-medium hover:bg-white transition-all duration-200 active:scale-95"
+                    className="px-4 py-1.5 rounded-full bg-white text-black text-sm font-medium hover:bg-white/90 transition-all duration-200 active:scale-95"
                   >
                     Save & Submit
                   </button>
@@ -97,7 +97,7 @@ const MessageBubble = ({ message, onEdit }) => {
                       setIsEditing(false);
                       setEditContent(message.content);
                     }}
-                    className="px-4 py-1.5 rounded-full bg-zinc-800 text-zinc-300 text-sm font-medium hover:bg-zinc-700 transition-all duration-200 active:scale-95"
+                    className="px-4 py-1.5 rounded-full bg-neutral-800 text-[var(--text-secondary)] text-sm font-medium hover:bg-neutral-700 transition-all duration-200 active:scale-95"
                   >
                     Cancel
                   </button>
@@ -153,7 +153,7 @@ const MessageBubble = ({ message, onEdit }) => {
                   components={{
                     p({ children }) {
                       return (
-                        <p className="mb-3 last:mb-0 leading-relaxed">
+                        <p className="mb-4 last:mb-0 leading-relaxed text-lg">
                           {children}
                         </p>
                       );
@@ -165,10 +165,10 @@ const MessageBubble = ({ message, onEdit }) => {
 
                       if (isInline) {
                         return (
-                          <code
-                            className="bg-white/10 px-1.5 py-0.5 rounded-md text-sm font-mono text-[var(--accent)]"
-                            {...props}
-                          >
+                            <code
+                              className="bg-white/10 px-1.5 py-0.5 rounded-md text-sm font-mono text-[var(--accent)] text-base"
+                              {...props}
+                            >
                             {children}
                           </code>
                         );
@@ -176,13 +176,13 @@ const MessageBubble = ({ message, onEdit }) => {
 
                       return (
                         <div className="relative group my-4 rounded-xl overflow-hidden ring-1 ring-white/10">
-                          <div className="flex items-center justify-between px-4 py-2 bg-zinc-900/80 border-b border-white/5">
+                          <div className="flex items-center justify-between px-4 py-2 bg-neutral-900 border-b border-white/5">
                             <span className="text-xs text-zinc-400 font-mono">
                               {match?.[1] || "code"}
                             </span>
                             <CopyButton text={codeString} />
                           </div>
-                          <pre className="bg-zinc-950 p-4 overflow-x-auto text-sm leading-relaxed no-scrollbar">
+                          <pre className="bg-black p-4 overflow-x-auto text-sm leading-relaxed no-scrollbar">
                             <code className={className} {...props}>
                               {children}
                             </code>
@@ -192,14 +192,14 @@ const MessageBubble = ({ message, onEdit }) => {
                     },
                     ul({ children }) {
                       return (
-                        <ul className="list-disc pl-5 mb-3 space-y-1">
+                        <ul className="list-disc pl-6 mb-4 space-y-1.5 text-lg">
                           {children}
                         </ul>
                       );
                     },
                     ol({ children }) {
                       return (
-                        <ol className="list-decimal pl-5 mb-3 space-y-1">
+                        <ol className="list-decimal pl-6 mb-4 space-y-1.5 text-lg">
                           {children}
                         </ol>
                       );
@@ -218,28 +218,28 @@ const MessageBubble = ({ message, onEdit }) => {
                     },
                     blockquote({ children }) {
                       return (
-                        <blockquote className="border-l-2 border-[var(--accent)]/30 pl-4 italic text-zinc-400 my-3">
+                        <blockquote className="border-l-2 border-[var(--accent)]/30 pl-4 italic text-[var(--text-secondary)] my-4 text-lg">
                           {children}
                         </blockquote>
                       );
                     },
                     h1({ children }) {
                       return (
-                        <h1 className="text-xl font-semibold mt-6 mb-3 text-zinc-100">
+                        <h1 className="text-2xl font-semibold mt-6 mb-3 text-[var(--text-primary)]">
                           {children}
                         </h1>
                       );
                     },
                     h2({ children }) {
                       return (
-                        <h2 className="text-lg font-semibold mt-5 mb-2 text-zinc-100">
+                        <h2 className="text-xl font-semibold mt-5 mb-2 text-[var(--text-primary)]">
                           {children}
                         </h2>
                       );
                     },
                     h3({ children }) {
                       return (
-                        <h3 className="text-base font-semibold mt-4 mb-2 text-zinc-100">
+                        <h3 className="text-lg font-semibold mt-4 mb-2 text-[var(--text-primary)]">
                           {children}
                         </h3>
                       );
@@ -258,14 +258,14 @@ const MessageBubble = ({ message, onEdit }) => {
                     },
                     th({ children }) {
                       return (
-                        <th className="border border-white/5 px-3 py-2 bg-white/5 font-medium text-left text-zinc-300">
+                        <th className="border border-white/5 px-3 py-2 bg-white/5 font-medium text-left text-[var(--text-primary)]">
                           {children}
                         </th>
                       );
                     },
                     td({ children }) {
                       return (
-                        <td className="border border-white/5 px-3 py-2 text-zinc-400">
+                        <td className="border border-white/5 px-3 py-2 text-[var(--text-secondary)]">
                           {children}
                         </td>
                       );

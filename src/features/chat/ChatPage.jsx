@@ -7,8 +7,8 @@ import { Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LoadingSkeleton = () => (
-  <div className="flex h-screen bg-[var(--surface)]">
-    <div className="w-[260px] bg-[var(--surface-overlay)] hidden md:flex flex-col p-4 gap-4">
+  <div className="flex h-screen bg-[#212121]">
+    <div className="w-[260px] bg-[#171717] hidden md:flex flex-col p-4 gap-4">
       <div className="shimmer h-8 w-3/4 rounded-lg" />
       <div className="shimmer h-8 w-full rounded-lg" />
       <div className="shimmer h-8 w-full rounded-lg" />

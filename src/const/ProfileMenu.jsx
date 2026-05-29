@@ -138,8 +138,8 @@ const ProfileMenu = ({ user, isCollapsed }) => {
         aria-haspopup="true"
         className={`flex items-center w-full rounded-xl transition-all duration-200 ${
           open 
-            ? "bg-zinc-200/80 dark:bg-zinc-800 ring-1 ring-zinc-200 dark:ring-zinc-700 shadow-sm" 
-            : "hover:bg-zinc-200 dark:hover:bg-zinc-800"
+            ? "bg-neutral-800 ring-1 ring-white/10 shadow-sm" 
+            : "hover:bg-neutral-800"
         } ${
           isCollapsed ? "justify-center p-1.5" : "gap-3 px-2.5 py-2.5"
         }`}
@@ -147,10 +147,10 @@ const ProfileMenu = ({ user, isCollapsed }) => {
         {avatar}
         {!isCollapsed && (
           <div className="flex-1 min-w-0 text-left">
-            <div className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 truncate leading-tight">
+            <div className="text-sm font-semibold text-[var(--text-primary)] truncate leading-tight">
               {displayName}
             </div>
-            <div className="text-[10px] text-zinc-500 truncate leading-tight mt-0.5">
+            <div className="text-[10px] text-[var(--text-tertiary)] truncate leading-tight mt-0.5">
               {email}
             </div>
           </div>
@@ -165,18 +165,18 @@ const ProfileMenu = ({ user, isCollapsed }) => {
             animate="visible"
             exit="exit"
             role="menu"
-            className={`absolute z-[100] bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-1.5 shadow-2xl origin-bottom mb-2.5 ${
+            className={`absolute z-[100] bg-[#171717] border border-white/[0.06] rounded-2xl p-1.5 shadow-2xl origin-bottom mb-2.5 ${
               isCollapsed ? "bottom-full left-0 w-56" : "bottom-full left-0 right-0"
             }`}
           >
             {/* User Info Header */}
             {!isCollapsed && (
-              <div className="px-3 py-3 border-b border-zinc-200/50 dark:border-zinc-800/50 mb-2">
+              <div className="px-3 py-3 border-b border-white/[0.06] mb-2">
                 <div className="flex items-center gap-3">
                   {avatar}
                   <div className="min-w-0">
-                    <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{displayName}</div>
-                    <div className="text-[11px] text-zinc-500 truncate font-medium">{email}</div>
+                    <div className="text-sm font-bold text-[var(--text-primary)] truncate">{displayName}</div>
+                    <div className="text-[11px] text-[var(--text-tertiary)] truncate font-medium">{email}</div>
                   </div>
                 </div>
               </div>
@@ -184,20 +184,20 @@ const ProfileMenu = ({ user, isCollapsed }) => {
 
             {/* User Info in Collapsed Mode */}
             {isCollapsed && (
-               <div className="px-3 py-2 border-b border-zinc-200/50 dark:border-zinc-800/50 mb-2">
-                  <div className="text-sm font-bold text-zinc-900 dark:text-zinc-100 truncate">{displayName}</div>
-                  <div className="text-[10px] text-zinc-500 truncate">{email}</div>
+               <div className="px-3 py-2 border-b border-white/[0.06] mb-2">
+                  <div className="text-sm font-bold text-[var(--text-primary)] truncate">{displayName}</div>
+                  <div className="text-[10px] text-[var(--text-tertiary)] truncate">{email}</div>
                </div>
             )}
 
             {/* Upload Status Overlay */}
             {uploadStatus.isUploading && (
-              <div className="px-3 py-2 mb-2 bg-zinc-100/50 dark:bg-zinc-800/30 rounded-xl">
+              <div className="px-3 py-2 mb-2 bg-neutral-800/30 rounded-xl">
                 <div className="flex items-center justify-between mb-1.5">
                   <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Uploading</span>
                   <span className="text-[10px] font-black text-indigo-500">{uploadStatus.progress}%</span>
                 </div>
-                <div className="h-1 w-full bg-zinc-200 dark:bg-zinc-700/50 rounded-full overflow-hidden">
+                <div className="h-1 w-full bg-zinc-700/50 rounded-full overflow-hidden">
                   <motion.div 
                     initial={{ width: 0 }}
                     animate={{ width: `${uploadStatus.progress}%` }}
@@ -234,9 +234,9 @@ const ProfileMenu = ({ user, isCollapsed }) => {
               <button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={uploadStatus.isUploading}
-                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all duration-200 disabled:opacity-50"
+                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50"
               >
-                <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-zinc-700 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center group-hover:bg-neutral-700 transition-colors">
                   <FiCamera size={16} />
                 </div>
                 <span className="font-medium">Upload Photo</span>
@@ -244,15 +244,15 @@ const ProfileMenu = ({ user, isCollapsed }) => {
 
               <button
                 onClick={() => console.log("Settings clicked")}
-                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-zinc-600 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800/80 transition-all duration-200"
+                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-neutral-800 transition-all duration-200"
               >
-                <div className="w-8 h-8 rounded-lg bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center group-hover:bg-white dark:group-hover:bg-zinc-700 transition-colors">
+                <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center group-hover:bg-neutral-700 transition-colors">
                   <FiSettings size={16} />
                 </div>
                 <span className="font-medium">Settings</span>
               </button>
 
-              <div className="my-1.5 border-t border-zinc-200/50 dark:border-zinc-800/50" />
+              <div className="my-1.5 border-t border-white/[0.06]" />
 
               <button
                 onClick={handleLogout}
