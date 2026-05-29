@@ -78,11 +78,32 @@ export const useChat = (user) => {
         throw new Error(`Failed to send message: ${response.statusText}`);
       }
 
-      // NEW: get chatId from response header
-      const newChatId = response.headers.get("X-Chat-Id");
+      // Capture chatId from response headers (ensure case-insensitive check)
+      const newChatId = response.headers.get("X-Chat-Id") || 
+                       response.headers.get("x-chat-id") || 
+                       response.headers.get("Chat-Id");
 
-      if (newChatId) {
+      if (newChatId && !activeChatId) {
         setActiveChatId(newChatId);
+      } else if (!activeChatId) {
+        // Fallback: If no header, fetch latest chat after a small delay
+        // to allow the backend to finish creating it.
+        setTimeout(async () => {
+          try {
+            const token = await user.getIdToken();
+            const res = await fetch(`${API_BASE}/chat/all`, {
+              headers: { Authorization: `Bearer ${token}` },
+            });
+            if (res.ok) {
+              const chats = await res.json();
+              if (chats.length > 0) {
+                setActiveChatId(chats[0].id);
+              }
+            }
+          } catch (err) {
+            console.error("Fallback fetch error:", err);
+          }
+        }, 1000);
       }
 
       const reader = response.body.getReader();
