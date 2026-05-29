@@ -5,6 +5,8 @@ Jerry is a modern, responsive AI chat application built with React, Vite, and Fi
 ## 🚀 Features
 
 - **Real-time Streaming**: AI responses stream in real-time for a natural chat experience.
+- **Message Editing**: Edit previous messages and get updated streaming responses.
+- **Chat Management**: Rename and delete chat history for better organization.
 - **Thinking Animation**: Visual feedback while the AI processes your request.
 - **Mobile Optimized**: Responsive design with a slide-out sidebar and touch-friendly inputs.
 - **Secure Auth**: Firebase Authentication for user accounts.
