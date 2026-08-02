@@ -1,5 +1,9 @@
+import { Link } from "react-router-dom";
 import { SignUp } from "@clerk/clerk-react";
 import { clerkAppearance } from "../features/auth/clerkAppearance";
+
+const SIGN_UP_BG =
+  "https://i.ibb.co/S2sRnk7/dubi-set.webp";
 
 /**
  * Clerk-hosted sign-up: Google OAuth, email+password, username
@@ -8,15 +12,28 @@ import { clerkAppearance } from "../features/auth/clerkAppearance";
 const SignUpPage = () => {
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#000000] px-4">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-900/40 via-transparent to-transparent" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_bottom_right,_var(--tw-gradient-stops))] from-indigo-900/30 via-transparent to-transparent" />
+      <img
+        src={SIGN_UP_BG}
+        alt=""
+        aria-hidden="true"
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       <div className="relative z-10 flex w-full max-w-md flex-col items-center gap-6">
         <div className="text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-white">
+          <h1 className="text-2xl font-semibold tracking-tight text-white drop-shadow">
             Create account
           </h1>
-          <p className="mt-1 text-sm text-white/50">
+          <p className="mt-1 text-sm text-white/70 drop-shadow">
             Get started with Jerry — Google, email, or username
+          </p>
+          <p className="mt-3 text-sm text-white/80">
+            Already have an account?{" "}
+            <Link
+              to="/sign-in"
+              className="font-medium text-white underline underline-offset-4 hover:text-white"
+            >
+              Sign in
+            </Link>
           </p>
         </div>
         <SignUp
