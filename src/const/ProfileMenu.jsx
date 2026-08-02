@@ -1,11 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { signOut, updateProfile } from "firebase/auth";
-import { auth } from "../firebase/firebase.config";
-import { FiLogOut, FiSettings, FiCamera } from "react-icons/fi";
-import { doc, setDoc } from "firebase/firestore";
-import { db } from "../firebase/firebase.config";
-import { FaUserCircle } from "react-icons/fa";
+import { useClerk } from "@clerk/clerk-react";
+import { FiLogOut, FiSettings, FiUser } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
+import EditProfileModal from "../features/profile/EditProfileModal";
+import SettingsModal from "../features/profile/SettingsModal";
 
 const menuVariants = {
   hidden: { opacity: 0, y: 8, scale: 0.96 },
@@ -23,17 +21,17 @@ const menuVariants = {
   },
 };
 
+/**
+ * Bottom-left account menu.
+ * Profile → Edit profile modal (Phase 2)
+ * Settings → Settings modal (Phase 3)
+ */
 const ProfileMenu = ({ user, isCollapsed }) => {
   const [open, setOpen] = useState(false);
-  const [uploadStatus, setUploadStatus] = useState({
-    isUploading: false,
-    progress: 0,
-    error: null,
-    success: false,
-  });
-  
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const menuRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const { signOut } = useClerk();
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -54,61 +52,18 @@ const ProfileMenu = ({ user, isCollapsed }) => {
   }, [open]);
 
   const handleLogout = useCallback(async () => {
-    await signOut(auth);
+    await signOut({ redirectUrl: "/sign-in" });
+  }, [signOut]);
+
+  const handleOpenProfile = useCallback(() => {
+    setOpen(false);
+    setSettingsOpen(false);
+    setProfileOpen(true);
   }, []);
 
-  const handlePhotoUpdate = useCallback(async (file) => {
-    if (!file || !auth.currentUser) return;
-    
-    setUploadStatus({ isUploading: true, progress: 0, error: null, success: false });
-
-    try {
-      // Simulate progress for a smoother UI experience as requested
-      const progressInterval = setInterval(() => {
-        setUploadStatus(prev => {
-          if (prev.progress >= 90) {
-            clearInterval(progressInterval);
-            return prev;
-          }
-          return { ...prev, progress: prev.progress + 10 };
-        });
-      }, 200);
-
-      const formData = new FormData();
-      formData.append("file", file);
-      formData.append("upload_preset", "jerry_unsigned");
-
-      const response = await fetch(
-        "https://api.cloudinary.com/v1_1/djx1pesuh/image/upload",
-        { method: "POST", body: formData }
-      );
-      
-      clearInterval(progressInterval);
-      const data = await response.json();
-
-      if (!data.secure_url) throw new Error("Upload failed");
-
-      setUploadStatus(prev => ({ ...prev, progress: 100 }));
-
-      await updateProfile(auth.currentUser, { photoURL: data.secure_url });
-      await setDoc(
-        doc(db, "users", auth.currentUser.uid),
-        { photoURL: data.secure_url, updatedAt: new Date() },
-        { merge: true }
-      );
-
-      setUploadStatus({ isUploading: false, progress: 100, error: null, success: true });
-      
-      // Reset success state after 3 seconds
-      setTimeout(() => {
-        setUploadStatus(prev => ({ ...prev, success: false }));
-        setOpen(false);
-      }, 2000);
-
-    } catch (err) {
-      console.error("Photo upload error:", err);
-      setUploadStatus({ isUploading: false, progress: 0, error: "Failed to upload photo", success: false });
-    }
+  const handleOpenSettings = useCallback(() => {
+    setOpen(false);
+    setSettingsOpen(true);
   }, []);
 
   const displayName = user?.displayName || "User";
@@ -119,38 +74,35 @@ const ProfileMenu = ({ user, isCollapsed }) => {
     <img
       src={user.photoURL}
       alt=""
-      className="w-8 h-8 rounded-full object-cover ring-1 ring-white/10"
+      className="h-8 w-8 rounded-full object-cover ring-1 ring-white/10"
     />
   ) : (
-    <div className="w-8 h-8 rounded-full bg-zinc-800 ring-1 ring-white/10 flex items-center justify-center shrink-0 overflow-hidden">
-      <span className="text-xs font-semibold text-zinc-400">
-        {initial}
-      </span>
+    <div className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#000000] ring-1 ring-white/10">
+      <span className="text-xs font-semibold text-zinc-400">{initial}</span>
     </div>
   );
 
   return (
     <div className="relative w-full" ref={menuRef}>
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         aria-label="Profile menu"
         aria-expanded={open}
         aria-haspopup="true"
-        className={`flex items-center w-full rounded-xl transition-all duration-200 ${
-          open 
-            ? "bg-neutral-800 ring-1 ring-white/10 shadow-sm" 
-            : "hover:bg-neutral-800"
-        } ${
-          isCollapsed ? "justify-center p-1.5" : "gap-3 px-2.5 py-2.5"
-        }`}
+        className={`flex w-full items-center rounded-xl transition-all duration-200 ${
+          open
+            ? "bg-[#000000] shadow-sm ring-1 ring-white/10"
+            : "hover:bg-[#000000]"
+        } ${isCollapsed ? "justify-center p-1.5" : "gap-3 px-2.5 py-2.5"}`}
       >
         {avatar}
         {!isCollapsed && (
-          <div className="flex-1 min-w-0 text-left">
-            <div className="text-sm font-semibold text-[var(--text-primary)] truncate leading-tight">
+          <div className="min-w-0 flex-1 text-left">
+            <div className="truncate text-sm font-semibold leading-tight text-[var(--text-primary)]">
               {displayName}
             </div>
-            <div className="text-[10px] text-[var(--text-tertiary)] truncate leading-tight mt-0.5">
+            <div className="mt-0.5 truncate text-[10px] leading-tight text-[var(--text-tertiary)]">
               {email}
             </div>
           </div>
@@ -165,109 +117,76 @@ const ProfileMenu = ({ user, isCollapsed }) => {
             animate="visible"
             exit="exit"
             role="menu"
-            className={`absolute z-[100] bg-[#171717] border border-white/[0.06] rounded-2xl p-1.5 shadow-2xl origin-bottom mb-2.5 ${
+            className={`absolute z-[100] origin-bottom rounded-2xl border border-white/10 bg-[#000000] p-1.5 shadow-2xl mb-2.5 ${
               isCollapsed ? "bottom-full left-0 w-56" : "bottom-full left-0 right-0"
             }`}
           >
-            {/* User Info Header */}
-            {!isCollapsed && (
-              <div className="px-3 py-3 border-b border-white/[0.06] mb-2">
-                <div className="flex items-center gap-3">
-                  {avatar}
-                  <div className="min-w-0">
-                    <div className="text-sm font-bold text-[var(--text-primary)] truncate">{displayName}</div>
-                    <div className="text-[11px] text-[var(--text-tertiary)] truncate font-medium">{email}</div>
+            <div className="mb-2 border-b border-white/10 px-3 py-3">
+              <div className="flex items-center gap-3">
+                {avatar}
+                <div className="min-w-0">
+                  <div className="truncate text-sm font-bold text-[var(--text-primary)]">
+                    {displayName}
+                  </div>
+                  <div className="truncate text-[11px] font-medium text-[var(--text-tertiary)]">
+                    {email}
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* User Info in Collapsed Mode */}
-            {isCollapsed && (
-               <div className="px-3 py-2 border-b border-white/[0.06] mb-2">
-                  <div className="text-sm font-bold text-[var(--text-primary)] truncate">{displayName}</div>
-                  <div className="text-[10px] text-[var(--text-tertiary)] truncate">{email}</div>
-               </div>
-            )}
-
-            {/* Upload Status Overlay */}
-            {uploadStatus.isUploading && (
-              <div className="px-3 py-2 mb-2 bg-neutral-800/30 rounded-xl">
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Uploading</span>
-                  <span className="text-[10px] font-black text-indigo-500">{uploadStatus.progress}%</span>
-                </div>
-                <div className="h-1 w-full bg-zinc-700/50 rounded-full overflow-hidden">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: `${uploadStatus.progress}%` }}
-                    className="h-full bg-indigo-500 shadow-[0_0_8px_rgba(99,102,241,0.5)]"
-                  />
-                </div>
-              </div>
-            )}
-
-            {uploadStatus.error && (
-              <div className="px-3 py-2 mb-2 bg-red-500/10 text-red-500 text-[10px] font-medium rounded-xl border border-red-500/20">
-                {uploadStatus.error}
-              </div>
-            )}
-
-            {uploadStatus.success && (
-              <div className="px-3 py-2 mb-2 bg-emerald-500/10 text-emerald-500 text-[10px] font-medium rounded-xl border border-emerald-500/20">
-                Success! Profile updated.
-              </div>
-            )}
-
-            {/* Menu Items */}
             <div className="space-y-0.5">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handlePhotoUpdate(file);
-                }}
-                className="hidden"
-              />
               <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploadStatus.isUploading}
-                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-neutral-800 transition-all duration-200 disabled:opacity-50"
+                type="button"
+                role="menuitem"
+                onClick={handleOpenProfile}
+                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-all duration-200 hover:bg-[#000000] hover:text-[var(--text-primary)]"
               >
-                <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center group-hover:bg-neutral-700 transition-colors">
-                  <FiCamera size={16} />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#000000] transition-colors group-hover:bg-[#000000]">
+                  <FiUser size={16} />
                 </div>
-                <span className="font-medium">Upload Photo</span>
+                <span className="font-medium">Profile</span>
               </button>
 
               <button
-                onClick={() => console.log("Settings clicked")}
-                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-neutral-800 transition-all duration-200"
+                type="button"
+                role="menuitem"
+                onClick={handleOpenSettings}
+                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-all duration-200 hover:bg-[#000000] hover:text-[var(--text-primary)]"
               >
-                <div className="w-8 h-8 rounded-lg bg-neutral-800 flex items-center justify-center group-hover:bg-neutral-700 transition-colors">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#000000] transition-colors group-hover:bg-[#000000]">
                   <FiSettings size={16} />
                 </div>
                 <span className="font-medium">Settings</span>
               </button>
 
-              <div className="my-1.5 border-t border-white/[0.06]" />
+              <div className="my-1.5 border-t border-white/10" />
 
               <button
+                type="button"
+                role="menuitem"
                 onClick={handleLogout}
-                className="group flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-500/10 transition-all duration-200"
+                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-500 transition-all duration-200 hover:bg-red-500/10"
               >
-                <div className="w-8 h-8 rounded-lg bg-red-500/10 flex items-center justify-center group-hover:bg-red-500/20 transition-colors">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 transition-colors group-hover:bg-red-500/20">
                   <FiLogOut size={16} />
                 </div>
                 <span className="font-medium">Log out</span>
               </button>
             </div>
           </motion.div>
-
         )}
       </AnimatePresence>
+
+      <EditProfileModal
+        isOpen={profileOpen}
+        onClose={() => setProfileOpen(false)}
+      />
+      <SettingsModal
+        isOpen={settingsOpen}
+        onClose={() => setSettingsOpen(false)}
+        onOpenProfile={handleOpenProfile}
+      />
     </div>
   );
 };

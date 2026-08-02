@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import Sidebar from "./Sidebar";
 import ChatWindow from "./ChatWindow";
 import { useChat } from "./useChat";
@@ -7,8 +7,8 @@ import { Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LoadingSkeleton = () => (
-  <div className="flex h-screen bg-[#212121]">
-    <div className="w-[260px] bg-[#171717] hidden md:flex flex-col p-4 gap-4">
+  <div className="flex h-screen bg-[var(--surface)]">
+    <div className="hidden w-[260px] flex-col gap-4 bg-[var(--surface-sidebar)] p-4 md:flex">
       <div className="shimmer h-8 w-3/4 rounded-lg" />
       <div className="shimmer h-8 w-full rounded-lg" />
       <div className="shimmer h-8 w-full rounded-lg" />
@@ -28,10 +28,9 @@ const ChatPage = () => {
   const { user } = useAuth();
   const chat = useChat(user);
 
-  const hasMessages = Array.isArray(chat.messages) && chat.messages.length > 0;
-
+  // ProtectedRoute already enforces sign-in; wait for AuthProvider bridge.
   if (user === undefined) return <LoadingSkeleton />;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/sign-in" replace />;
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--surface)] text-[var(--text-primary)]">
