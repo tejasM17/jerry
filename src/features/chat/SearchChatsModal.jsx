@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiX, FiSearch, FiMessageSquare, FiPlus } from "react-icons/fi";
 import { useAuth } from "../auth/AuthProvider";
-import { API_BASE } from "../../api/base";
+import { fetchRecentChats, searchChats } from "../../api/chat";
 import { useDebounce } from "./hooks/useDebounce";
 
 const SkeletonRow = () => (
@@ -27,12 +27,7 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
     setLoading(true);
     setError(null);
     try {
-      const token = await user.getIdToken();
-      const res = await fetch(`${API_BASE}/chat/recent?limit=10`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to fetch recent chats");
-      const data = await res.json();
+      const data = await fetchRecentChats(() => user.getIdToken(), 10);
       setResults(data);
     } catch (err) {
       console.error("Search chats error:", err);
@@ -48,13 +43,7 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
       setLoading(true);
       setError(null);
       try {
-        const token = await user.getIdToken();
-        const res = await fetch(
-          `${API_BASE}/chat/search?q=${encodeURIComponent(q)}`,
-          { headers: { Authorization: `Bearer ${token}` } }
-        );
-        if (!res.ok) throw new Error("Failed to search chats");
-        const data = await res.json();
+        const data = await searchChats(() => user.getIdToken(), q);
         setResults(data);
       } catch (err) {
         console.error("Search chats error:", err);
@@ -63,7 +52,7 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
         setLoading(false);
       }
     },
-    [user]
+    [user],
   );
 
   useEffect(() => {
@@ -126,10 +115,10 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.15, ease: "easeOut" }}
-            className="w-full max-w-lg mx-4 bg-[var(--surface-elevated)] rounded-xl shadow-2xl border border-white/[0.06] overflow-hidden"
+            className="w-full max-w-lg mx-4 bg-[var(--surface-elevated)] rounded-xl shadow-2xl border border-white/10 overflow-hidden"
           >
             {/* Search Input */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.06]">
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-white/10">
               <FiSearch size={18} className="shrink-0 text-[var(--text-tertiary)]" />
               <input
                 ref={inputRef}
@@ -163,7 +152,7 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
                   {/* New Chat Option */}
                     <button
                       onClick={handleNewChat}
-                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-neutral-800"
+                      className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-[#000000]"
                     >
                       <FiPlus size={16} className="shrink-0 text-[var(--text-tertiary)]" />
                       <span className="text-sm text-[var(--text-secondary)]">New chat</span>
@@ -182,7 +171,7 @@ const SearchChatsModal = ({ isOpen, onClose, chat }) => {
                       <button
                         key={item.id}
                         onClick={() => handleSelect(item.id)}
-                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-neutral-800"
+                        className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-left transition-colors hover:bg-[#000000]"
                       >
                         <FiMessageSquare size={16} className="shrink-0 text-[var(--text-tertiary)]" />
                         <span className="text-sm text-[var(--text-secondary)] truncate">

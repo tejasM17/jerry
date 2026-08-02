@@ -5,6 +5,7 @@ import { FaGoogleDrive } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../auth/AuthProvider";
 import { API_BASE } from "../../api/base";
+import { uploadChatFile } from "../../api/chat";
 
 const AttachmentMenu = ({ isOpen, onClose, onUploadClick }) => {
   const menuItems = [
@@ -36,12 +37,13 @@ const AttachmentMenu = ({ isOpen, onClose, onUploadClick }) => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 10, scale: 0.95 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="absolute bottom-full mb-3 left-0 z-50 w-56 bg-neutral-800/95 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl overflow-hidden py-1.5"
+            className="absolute bottom-full left-0 z-50 mb-3 w-56 overflow-hidden rounded-2xl border border-white/10 bg-[#000000]/95 py-1.5 shadow-2xl backdrop-blur-xl"
           >
             {menuItems.map((item, index) => (
               <button
                 key={index}
-                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 hover:text-white transition-colors text-left"
+                type="button"
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-zinc-300 transition-colors hover:bg-white/5 hover:text-white"
                 onClick={item.onClick || onClose}
               >
                 <span className="text-zinc-400">{item.icon}</span>
@@ -55,7 +57,21 @@ const AttachmentMenu = ({ isOpen, onClose, onUploadClick }) => {
   );
 };
 
-const ChatInput = ({ onSend, loading }) => {
+/**
+ * Shared composer pill.
+ * @param {string} [prefill] — when set, fills the textarea (shortcut chips).
+ * @param {() => void} [onPrefillConsumed] — clear parent prefill after apply.
+ * @param {boolean} [showDisclaimer] — footer hint under bar (default true when docked).
+ * @param {boolean} [autoFocus]
+ */
+const ChatInput = ({
+  onSend,
+  loading,
+  prefill = "",
+  onPrefillConsumed,
+  showDisclaimer = true,
+  autoFocus = false,
+}) => {
   const { user } = useAuth();
   const [text, setText] = useState("");
   const [attachments, setAttachments] = useState([]);
@@ -63,6 +79,22 @@ const ChatInput = ({ onSend, loading }) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const textareaRef = useRef(null);
   const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (!prefill) return;
+    setText(prefill);
+    onPrefillConsumed?.();
+    requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    });
+  }, [prefill, onPrefillConsumed]);
+
+  useEffect(() => {
+    if (autoFocus) textareaRef.current?.focus();
+  }, [autoFocus]);
 
   const handleInput = useCallback(() => {
     const el = textareaRef.current;
@@ -77,38 +109,19 @@ const ChatInput = ({ onSend, loading }) => {
     if (files.length === 0 || !user) return;
 
     setUploading(true);
-    const token = await user.getIdToken();
-
     try {
-      const uploadPromises = files.map(async (file) => {
-        const formData = new FormData();
-        formData.append("file", file);
-
-        const response = await fetch(`${API_BASE}/chat/upload`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        });
-
-        if (!response.ok) throw new Error(`Upload failed for ${file.name}`);
-
-        const data = await response.json();
-
-        // Ensure the URL is absolute if it's relative
-        if (data.url && !data.url.startsWith("http")) {
-          // If the URL starts with /api and API_BASE ends with /api, avoid duplication
-          const baseUrl = API_BASE.endsWith("/api")
-            ? API_BASE.replace(/\/api$/, "")
-            : API_BASE;
-          data.url = `${baseUrl}${data.url}`;
-        }
-
-        return data;
-      });
-
-      const uploadedFiles = await Promise.all(uploadPromises);
+      const uploadedFiles = await Promise.all(
+        files.map(async (file) => {
+          const data = await uploadChatFile(() => user.getIdToken(), file);
+          if (data.url && !data.url.startsWith("http")) {
+            const baseUrl = API_BASE.endsWith("/api")
+              ? API_BASE.replace(/\/api$/, "")
+              : API_BASE;
+            data.url = `${baseUrl}${data.url}`;
+          }
+          return data;
+        }),
+      );
       setAttachments((prev) => [...prev, ...uploadedFiles]);
     } catch (error) {
       console.error("Upload error:", error);
@@ -147,17 +160,18 @@ const ChatInput = ({ onSend, loading }) => {
     handleInput();
   }, [text, handleInput]);
 
+  const canSend = Boolean(text.trim() || attachments.length > 0);
+
   return (
-    <div className="px-3 md:px-4 pb-3 md:pb-4 pt-1">
-      <div className="max-w-3xl mx-auto">
-        {/* Attachment Previews */}
+    <div className="w-full px-3 pt-1 md:px-4">
+      <div className="mx-auto max-w-3xl">
         <AnimatePresence>
           {attachments.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
-              className="flex flex-wrap gap-2 mb-3"
+              className="mb-3 flex flex-wrap gap-2"
             >
               {attachments.map((file, index) => (
                 <motion.div
@@ -165,31 +179,33 @@ const ChatInput = ({ onSend, loading }) => {
                   initial={{ scale: 0.9, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
                   exit={{ scale: 0.9, opacity: 0 }}
-                  className="relative group w-14 h-14 rounded-xl overflow-hidden bg-zinc-800 ring-1 ring-white/10 shadow-lg"
+                  className="group relative h-14 w-14 overflow-hidden rounded-xl bg-[#000000] shadow-lg ring-1 ring-white/10"
                 >
                   {file.mimeType?.startsWith("image/") ? (
                     <img
                       src={file.url}
                       alt={file.name}
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                    <div className="flex h-full w-full items-center justify-center text-zinc-500">
                       <FiFile size={20} />
                     </div>
                   )}
                   <button
+                    type="button"
                     onClick={() => removeAttachment(index)}
-                    className="absolute top-1 right-1 p-0.5 rounded-full bg-black/60 text-white opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity"
+                    className="absolute top-1 right-1 rounded-full bg-black/60 p-0.5 text-white opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100"
+                    aria-label="Remove attachment"
                   >
                     <FiX size={12} />
                   </button>
                 </motion.div>
               ))}
               {uploading && (
-                <div className="w-14 h-14 rounded-xl bg-zinc-800/50 flex items-center justify-center ring-1 ring-white/5">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-[#000000]/50 ring-1 ring-white/10">
                   <svg
-                    className="animate-spin h-5 w-5 text-zinc-500"
+                    className="h-5 w-5 animate-spin text-zinc-500"
                     viewBox="0 0 24 24"
                     fill="none"
                   >
@@ -213,7 +229,8 @@ const ChatInput = ({ onSend, loading }) => {
           )}
         </AnimatePresence>
 
-        <div className="relative flex items-end bg-[#2f2f2f] rounded-2xl pl-3 pr-2 py-2.5 ring-1 ring-white/10 focus-within:ring-white/20 transition-all duration-200">
+        {/* ~52px single-line pill; grows with textarea */}
+        <div className="relative flex min-h-[52px] items-end rounded-[26px] bg-[var(--surface-input)] py-1.5 pr-1.5 pl-2 ring-1 ring-white/10 transition-all duration-200 focus-within:ring-white/20">
           <input
             type="file"
             ref={fileInputRef}
@@ -222,14 +239,15 @@ const ChatInput = ({ onSend, loading }) => {
             accept="image/*,application/pdf,text/*,.doc,.docx,.txt"
             className="hidden"
           />
-          <div className="relative shrink-0 flex items-center">
+          <div className="relative flex shrink-0 items-center self-center">
             <button
+              type="button"
               onClick={() => setMenuOpen(!menuOpen)}
               aria-label="Add attachment"
-              className={`p-2 rounded-full transition-all duration-200 ${
+              className={`flex h-10 w-10 items-center justify-center rounded-full transition-all duration-200 ${
                 menuOpen
-                  ? "bg-zinc-700 text-white rotate-45"
-                  : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                  ? "rotate-45 bg-[#000000] text-white"
+                  : "text-zinc-400 hover:bg-white/5 hover:text-zinc-200"
               }`}
             >
               <FiPlus size={20} />
@@ -249,27 +267,42 @@ const ChatInput = ({ onSend, loading }) => {
             placeholder="Ask anything"
             rows={1}
             aria-label="Message input"
-            className="flex-1 bg-transparent resize-none outline-none text-[var(--text-primary)] px-3 py-1.5 max-h-[200px] leading-relaxed text-base placeholder-[var(--text-tertiary)] no-scrollbar"
+            className="no-scrollbar max-h-[200px] flex-1 resize-none bg-transparent px-2 py-2.5 text-[15px] leading-relaxed text-[var(--text-primary)] outline-none placeholder:text-[var(--text-tertiary)]"
             style={{ height: "auto" }}
           />
 
-          <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex shrink-0 items-center gap-0.5 self-center">
+            {/* Mic — no STT backend; visible but disabled */}
+            {!canSend && (
+              <button
+                type="button"
+                disabled
+                aria-disabled="true"
+                aria-label="Voice input unavailable"
+                title="Voice input coming soon"
+                className="flex h-10 w-10 cursor-not-allowed items-center justify-center rounded-full text-zinc-500 opacity-50"
+              >
+                <FiMic size={18} />
+              </button>
+            )}
+
             <AnimatePresence mode="wait">
-              {text.trim() || attachments.length > 0 ? (
+              {canSend ? (
                 <motion.button
                   key="send"
-                  initial={{ scale: 0.8, opacity: 0 }}
+                  type="button"
+                  initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
                   transition={{ duration: 0.15 }}
                   onClick={handleSend}
                   disabled={loading || uploading}
                   aria-label="Send message"
-                  className="p-2 rounded-full bg-[var(--accent)] text-white hover:bg-[var(--accent-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200 active:scale-95"
+                  className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-black transition-all duration-200 hover:bg-zinc-200 active:scale-95 disabled:cursor-not-allowed disabled:opacity-40"
                 >
                   {loading ? (
                     <svg
-                      className="animate-spin h-[18px] w-[18px]"
+                      className="h-[16px] w-[16px] animate-spin"
                       viewBox="0 0 24 24"
                       fill="none"
                     >
@@ -288,28 +321,43 @@ const ChatInput = ({ onSend, loading }) => {
                       />
                     </svg>
                   ) : (
-                    <IoSend size={18} />
+                    <IoSend size={16} />
                   )}
                 </motion.button>
               ) : (
                 <motion.button
-                  key="mic"
-                  initial={{ scale: 0.8, opacity: 0 }}
+                  key="idle"
+                  type="button"
+                  initial={{ scale: 0.85, opacity: 0 }}
                   animate={{ scale: 1, opacity: 1 }}
-                  exit={{ scale: 0.8, opacity: 0 }}
+                  exit={{ scale: 0.85, opacity: 0 }}
                   transition={{ duration: 0.15 }}
-                  aria-label="Voice input"
-                  className="p-2 text-zinc-400 hover:text-zinc-200 hover:bg-white/5 rounded-full transition-all duration-200"
+                  disabled
+                  aria-label="Send"
+                  className="flex h-9 w-9 cursor-default items-center justify-center rounded-full bg-white text-black"
                 >
-                  <FiMic size={20} />
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="currentColor"
+                    aria-hidden
+                  >
+                    <rect x="4" y="4" width="4" height="16" rx="1" />
+                    <rect x="10" y="8" width="4" height="12" rx="1" />
+                    <rect x="16" y="2" width="4" height="18" rx="1" />
+                  </svg>
                 </motion.button>
               )}
             </AnimatePresence>
           </div>
         </div>
-        <p className="text-center text-[11px] text-[var(--text-tertiary)] mt-2.5 select-none font-medium tracking-tight">
-          Jerry can make mistakes. Check important info.
-        </p>
+
+        {showDisclaimer && (
+          <p className="mt-2.5 select-none text-center text-[11px] font-medium tracking-tight text-[var(--text-tertiary)]">
+            Jerry can make mistakes. Check important info.
+          </p>
+        )}
       </div>
     </div>
   );

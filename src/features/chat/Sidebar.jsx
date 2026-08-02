@@ -17,15 +17,16 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import { useAuth } from "../auth/AuthProvider";
-import { API_BASE } from "../../api/base";
+import { fetchAllChats } from "../../api/chat";
 import { motion, AnimatePresence } from "framer-motion";
 
+/** Functional nav only; disabled items stay visible but non-interactive. */
 const navItems = [
   { icon: FiPlus, label: "New chat", action: "newChat" },
   { icon: FiSearch, label: "Search", action: "search" },
-  { icon: FiImage, label: "Assets" },
-  { icon: FiGrid, label: "Extensions" },
-  { icon: FiCode, label: "Developer" },
+  { icon: FiImage, label: "Assets", disabled: true },
+  { icon: FiGrid, label: "Extensions", disabled: true },
+  { icon: FiCode, label: "Developer", disabled: true },
 ];
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
@@ -47,12 +48,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
   const fetchChats = useCallback(async () => {
     if (!user) return;
     try {
-      const token = await user.getIdToken();
-      const res = await fetch(`${API_BASE}/chat/all`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to fetch chats");
-      const data = await res.json();
+      const data = await fetchAllChats(() => user.getIdToken());
       setChats(data);
     } catch (err) {
       console.error("Fetch chats error:", err);
@@ -93,57 +89,105 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
     }
   };
 
+  const openChat = (id) => {
+    chat.loadChat(id);
+    if (window.innerWidth < 768) setSidebarOpen(false);
+  };
+
   const sidebarContent = (
-    <div className="flex flex-col h-full bg-[#171717] text-[var(--text-primary)]">
-      {/* 1. Header Section */}
-      <div className={`p-4 flex items-center shrink-0 border-b border-white/[0.06] transition-all duration-300 ${isCollapsed ? "justify-center" : "justify-between"}`}>
-        <div className="flex items-center gap-3 overflow-hidden">
-          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center shrink-0">
-            <img src={JerryIcon} alt="" className="w-5 h-5 invert" />
+    <div className="flex h-full flex-col bg-[var(--surface-sidebar)] text-[var(--text-primary)]">
+      {/* Header */}
+      <div
+        className={`flex shrink-0 items-center border-b border-[var(--border-subtle)] p-3 transition-[padding] duration-300 ${
+          isCollapsed ? "justify-center" : "justify-between gap-2"
+        }`}
+      >
+        <div className="flex min-w-0 items-center gap-2.5 overflow-hidden">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10">
+            <img src={JerryIcon} alt="" className="h-5 w-5 invert" />
           </div>
           {!isCollapsed && (
-            <motion.span 
-              initial={{ opacity: 0, x: -10 }}
+            <motion.span
+              initial={{ opacity: 0, x: -8 }}
               animate={{ opacity: 1, x: 0 }}
-              className="font-semibold tracking-tight whitespace-nowrap"
+              transition={{ duration: 0.2 }}
+              className="truncate text-[15px] font-semibold tracking-tight"
             >
-              Jerry AI
+              Jerry
             </motion.span>
           )}
         </div>
         <button
+          type="button"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden md:flex p-1.5 hover:bg-neutral-800 rounded-md transition-colors text-zinc-500"
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          className="hidden h-10 w-10 items-center justify-center rounded-lg text-zinc-500 transition-colors duration-150 hover:bg-[#000000] hover:text-zinc-300 md:flex"
         >
-          {isCollapsed ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
+          {isCollapsed ? (
+            <FiChevronRight size={18} />
+          ) : (
+            <FiChevronLeft size={18} />
+          )}
         </button>
         <button
+          type="button"
           onClick={() => setSidebarOpen(false)}
-          className="md:hidden p-1.5 hover:bg-neutral-800 rounded-md transition-colors text-zinc-500"
+          aria-label="Close sidebar"
+          className="flex h-10 w-10 items-center justify-center rounded-lg text-zinc-500 transition-colors duration-150 hover:bg-[#000000] md:hidden"
         >
           <FiX size={18} />
         </button>
       </div>
 
-      {/* 2. Navigation & History Section */}
-      <div className="flex-1 overflow-y-auto no-scrollbar py-4">
-        {/* Main Nav Items */}
-        <div className="px-3 space-y-1 mb-6">
+      {/* Nav + history */}
+      <div className="no-scrollbar flex-1 overflow-y-auto py-3">
+        <div className="mb-4 space-y-0.5 px-2">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isNewChat = item.action === "newChat";
             const isSearch = item.action === "search";
+            const disabled = Boolean(item.disabled);
+
             return (
               <button
                 key={item.label}
-                onClick={isNewChat ? handleNewChat : isSearch ? () => setSearchOpen(true) : undefined}
-                className={`group flex items-center w-full rounded-lg transition-all duration-200 hover:bg-neutral-800 ${
-                  isCollapsed ? "justify-center p-2.5" : "gap-3 px-3 py-2.5"
+                type="button"
+                disabled={disabled}
+                aria-disabled={disabled || undefined}
+                title={disabled ? "Coming soon" : item.label}
+                onClick={
+                  disabled
+                    ? undefined
+                    : isNewChat
+                      ? handleNewChat
+                      : isSearch
+                        ? () => setSearchOpen(true)
+                        : undefined
+                }
+                className={`group flex min-h-10 w-full items-center rounded-xl transition-colors duration-150 ${
+                  isCollapsed ? "justify-center px-2 py-2" : "gap-3 px-3 py-2"
+                } ${
+                  disabled
+                    ? "cursor-not-allowed opacity-40"
+                    : "hover:bg-[#000000]"
                 }`}
               >
-                <Icon size={18} className="shrink-0 text-zinc-500 group-hover:text-zinc-200 transition-colors" />
+                <Icon
+                  size={18}
+                  className={`shrink-0 transition-colors duration-150 ${
+                    disabled
+                      ? "text-zinc-600"
+                      : "text-zinc-400 group-hover:text-zinc-200"
+                  }`}
+                />
                 {!isCollapsed && (
-                  <span className="text-sm font-medium text-zinc-400 group-hover:text-zinc-200">
+                  <span
+                    className={`text-[13px] font-medium ${
+                      disabled
+                        ? "text-zinc-600"
+                        : "text-zinc-400 group-hover:text-zinc-200"
+                    }`}
+                  >
                     {item.label}
                   </span>
                 )}
@@ -152,116 +196,151 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
           })}
         </div>
 
-        {/* History Items */}
-        <div className="px-3 space-y-1">
+        <div className="space-y-0.5 px-2">
           {!isCollapsed && (
-            <h3 className="px-3 mb-2 text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">
-              Recent Activity
+            <h3 className="mb-1.5 px-3 text-[13px] font-medium text-zinc-500">
+              Chats
             </h3>
           )}
           <div className="space-y-0.5">
-            {chats.map((item) => (
-              <div
-                key={item.id}
-                className={`group relative flex items-center rounded-lg transition-all duration-200 cursor-pointer ${
-                  chat.activeChatId === item.id
-                    ? "bg-neutral-800"
-                    : "hover:bg-neutral-800/60"
-                } ${isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2.5"}`}
-              >
-                {isCollapsed ? (
-                  <div className="relative flex items-center justify-center w-full h-8" onClick={() => chat.loadChat(item.id)}>
-                    <FiMessageSquare size={18} className="text-zinc-500 group-hover:opacity-0 transition-opacity" />
-                    <div className="absolute inset-0 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1.5">
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }} 
-                        className="p-1 text-zinc-400 hover:text-zinc-200"
-                        title="Rename"
-                      >
-                        <FiEdit2 size={13} />
-                      </button>
-                      <button 
-                        onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }} 
-                        className="p-1 text-zinc-400 hover:text-red-500"
-                        title="Delete"
-                      >
-                        <FiTrash2 size={13} />
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <FiMessageSquare size={16} className="shrink-0 text-zinc-500" />
-                    {editingChatId === item.id ? (
-                      <div className="flex-1 flex items-center gap-1 min-w-0">
-                        <input
-                          ref={editInputRef}
-                          value={editTitle}
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          onBlur={() => handleRename(item.id)}
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter") handleRename(item.id);
-                            if (e.key === "Escape") setEditingChatId(null);
+            {chats.map((item) => {
+              const isActive = chat.activeChatId === item.id;
+              return (
+                <div
+                  key={item.id}
+                  className={`group relative flex min-h-10 items-center rounded-xl transition-colors duration-150 ${
+                    isActive ? "bg-[#000000]" : "hover:bg-[#000000]/60"
+                  } ${isCollapsed ? "justify-center px-2 py-2" : "gap-2 px-3 py-2"}`}
+                >
+                  {isCollapsed ? (
+                    <div
+                      className="relative flex h-8 w-full items-center justify-center"
+                      onClick={() => openChat(item.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") openChat(item.id);
+                      }}
+                    >
+                      <FiMessageSquare
+                        size={18}
+                        className="text-zinc-500 transition-opacity group-hover:opacity-0"
+                      />
+                      <div className="absolute inset-0 flex items-center justify-center gap-1 opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingChatId(item.id);
+                            setEditTitle(item.title || "");
                           }}
-                          className="flex-1 bg-transparent border-none outline-none text-sm p-0 min-w-0 font-medium text-[var(--text-primary)]"
-                        />
-                        <button onMouseDown={(e) => e.preventDefault()} onClick={() => handleRename(item.id)} className="text-green-500 p-0.5">
-                          <FiCheck size={14} />
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-zinc-200"
+                          title="Rename"
+                          aria-label="Rename chat"
+                        >
+                          <FiEdit2 size={13} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(item.id);
+                          }}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-400 hover:text-red-500"
+                          title="Delete"
+                          aria-label="Delete chat"
+                        >
+                          <FiTrash2 size={13} />
                         </button>
                       </div>
-                    ) : (
-                      <div className="flex-1 flex items-center justify-between min-w-0">
-                        <span
-                          className="text-sm truncate font-medium text-zinc-400 group-hover:text-zinc-200"
-                          onClick={() => { chat.loadChat(item.id); if (window.innerWidth < 768) setSidebarOpen(false); }}
-                        >
-                          {item.title || "Untitled Chat"}
-                        </span>
-                        <div className="flex items-center gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity shrink-0">
+                    </div>
+                  ) : (
+                    <>
+                      {editingChatId === item.id ? (
+                        <div className="flex min-w-0 flex-1 items-center gap-1">
+                          <input
+                            ref={editInputRef}
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
+                            onBlur={() => handleRename(item.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") handleRename(item.id);
+                              if (e.key === "Escape") setEditingChatId(null);
+                            }}
+                            className="min-w-0 flex-1 border-none bg-transparent p-0 text-[13px] font-medium text-[var(--text-primary)] outline-none"
+                            aria-label="Chat title"
+                          />
                           <button
-                            onClick={(e) => { e.stopPropagation(); setEditingChatId(item.id); setEditTitle(item.title || ""); }}
-                            className="p-1 text-zinc-500 hover:text-zinc-200 transition-colors"
+                            type="button"
+                            onMouseDown={(e) => e.preventDefault()}
+                            onClick={() => handleRename(item.id)}
+                            className="p-1 text-green-500"
+                            aria-label="Save title"
                           >
-                            <FiEdit2 size={13} />
-                          </button>
-                          <button
-                            onClick={(e) => { e.stopPropagation(); handleDelete(item.id); }}
-                            className="p-1 text-zinc-500 hover:text-red-500 transition-colors"
-                          >
-                            <FiTrash2 size={13} />
+                            <FiCheck size={14} />
                           </button>
                         </div>
-                      </div>
-                    )}
-                  </>
-                )}
-              </div>
-            ))}
+                      ) : (
+                        <div className="flex min-w-0 flex-1 items-center justify-between gap-1">
+                          <button
+                            type="button"
+                            className="min-w-0 flex-1 truncate text-left text-[13px] font-medium text-zinc-400 group-hover:text-zinc-200"
+                            onClick={() => openChat(item.id)}
+                          >
+                            {item.title || "Untitled Chat"}
+                          </button>
+                          <div className="flex shrink-0 items-center opacity-100 transition-opacity md:opacity-0 md:group-hover:opacity-100">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingChatId(item.id);
+                                setEditTitle(item.title || "");
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:text-zinc-200"
+                              aria-label="Rename chat"
+                            >
+                              <FiEdit2 size={13} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDelete(item.id);
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-lg text-zinc-500 transition-colors hover:text-red-500"
+                              aria-label="Delete chat"
+                            >
+                              <FiTrash2 size={13} />
+                            </button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
 
-      {/* 3. Footer Section (Profile) */}
-      <div className="p-3 border-t border-white/[0.06] shrink-0">
-        <div className={`flex items-center transition-all duration-300 ${isCollapsed ? "justify-center" : "gap-3"}`}>
-          <div className="flex-1 min-w-0">
-             <ProfileMenu user={user} isCollapsed={isCollapsed} />
-          </div>
-        </div>
+      {/* Profile footer — live Clerk user */}
+      <div className="shrink-0 border-t border-[var(--border-subtle)] p-2">
+        <ProfileMenu user={user} isCollapsed={isCollapsed} />
       </div>
     </div>
   );
 
   return (
     <>
-      {/* Search Chats Modal */}
       <SearchChatsModal
         isOpen={searchOpen}
         onClose={() => setSearchOpen(false)}
         chat={chat}
       />
 
-      {/* Mobile Overlay */}
+      {/* Mobile drawer */}
       <AnimatePresence>
         {sidebarOpen && (
           <motion.aside
@@ -269,17 +348,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
             animate={{ x: 0 }}
             exit={{ x: "-100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed inset-y-0 left-0 z-50 w-72 bg-[#171717] border-r border-white/[0.06] md:hidden shadow-2xl"
+            className="fixed inset-y-0 left-0 z-50 w-72 border-r border-[var(--border-subtle)] bg-[var(--surface-sidebar)] shadow-2xl md:hidden"
           >
             {sidebarContent}
           </motion.aside>
         )}
       </AnimatePresence>
 
-      {/* Desktop Persistent Sidebar */}
+      {/* Desktop rail — 260px / ~64px */}
       <aside
-        className={`hidden md:flex flex-col shrink-0 h-screen transition-all duration-300 ease-in-out border-r border-white/[0.06] bg-[#171717] ${
-          isCollapsed ? "w-16" : "w-64"
+        className={`hidden h-screen shrink-0 flex-col border-r border-[var(--border-subtle)] bg-[var(--surface-sidebar)] transition-[width] duration-300 ease-in-out md:flex ${
+          isCollapsed ? "w-16" : "w-[260px]"
         }`}
       >
         {sidebarContent}
