@@ -9,8 +9,6 @@ import {
   FiChevronDown,
   FiCheck,
 } from "react-icons/fi";
-import { useClerk } from "@clerk/clerk-react";
-import { clerkAppearance } from "../auth/clerkAppearance";
 
 const LANG_KEY = "jerry-language";
 
@@ -22,11 +20,10 @@ const LANGUAGE_OPTIONS = [
 /**
  * Phase 3 — compact Settings modal.
  * Only real / local controls: Dark appearance, language (localStorage),
- * Account → Edit profile, Security → Clerk UserProfile.
+ * Account → Edit profile.
  * No fake intelligence / dictation toggles.
  */
 const SettingsModal = ({ isOpen, onClose, onOpenProfile }) => {
-  const { openUserProfile } = useClerk();
   const [section, setSection] = useState("general");
   const [language, setLanguage] = useState(() => {
     try {
@@ -77,8 +74,7 @@ const SettingsModal = ({ isOpen, onClose, onOpenProfile }) => {
 
   const handleSecurity = useCallback(() => {
     onClose();
-    openUserProfile({ appearance: clerkAppearance });
-  }, [onClose, openUserProfile]);
+  }, [onClose]);
 
   const handleAccountProfile = useCallback(() => {
     onClose();

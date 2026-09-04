@@ -20,7 +20,7 @@ function resolveMediaUrl(url) {
 }
 
 /**
- * Fetch merged profile from jerry-api (Clerk + Mongo).
+ * Fetch merged profile from jerry-api (Firebase + Mongo).
  * @param {() => Promise<string|null>} getToken
  */
 export async function fetchProfile(getToken) {
@@ -35,7 +35,7 @@ export async function fetchProfile(getToken) {
 }
 
 /**
- * Update profile fields via backend (never Clerk Frontend for sensitive updates).
+ * Update profile fields via backend.
  */
 export async function updateProfile(getToken, body) {
   const headers = await authHeaders(getToken, {

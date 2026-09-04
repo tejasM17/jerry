@@ -18,6 +18,7 @@ or making any architectural decision:
 
 Update `context/progress-tracker.md` after each
 meaningful implementation change.
+- Added new streaming client helper `src/api/stream.js` and demo component `components/stream/StreamDemo.tsx`.
 
 If implementation changes the architecture, scope, or
 standards documented in the context files, update the

@@ -2,7 +2,6 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { FiCamera } from "react-icons/fi";
-import { useUser } from "@clerk/clerk-react";
 import { useAuth } from "../auth/AuthProvider";
 import {
   fetchProfile,
@@ -16,11 +15,10 @@ const USERNAME_RE = /^[a-zA-Z0-9_-]{3,30}$/;
 
 /**
  * Phase 2 — Edit profile modal (ChatGPT-style).
- * Loads/saves via jerry-api + Clerk; no hard-coded demo fields.
+ * Loads/saves via jerry-api + Firebase; no hard-coded demo fields.
  */
 const EditProfileModal = ({ isOpen, onClose }) => {
   const { user } = useAuth();
-  const { user: clerkUser } = useUser();
   const fileRef = useRef(null);
 
   const [displayName, setDisplayName] = useState("");
@@ -43,7 +41,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
     return user.getIdToken();
   }, [user]);
 
-  // Prefill from Clerk immediately, then refresh from API when available
+  // Prefill from Firebase session, then refresh from API when available
   useEffect(() => {
     if (!isOpen || !user) return;
 
@@ -70,7 +68,7 @@ const EditProfileModal = ({ isOpen, onClose }) => {
         setPhotoURL(profile.photoURL || user.photoURL || null);
         originalUsername.current = uname;
       } catch (err) {
-        // Clerk-prefilled fields still usable if API is down
+        // Session-prefilled fields still usable if API is down
         console.warn("[EditProfile] fetchProfile:", err.message);
       } finally {
         if (!cancelled) setLoading(false);
@@ -184,10 +182,8 @@ const EditProfileModal = ({ isOpen, onClose }) => {
 
       await updateProfile(getToken, body);
 
-      // Refresh Clerk session so sidebar name/avatar update without full reload
-      if (clerkUser?.reload) {
-        await clerkUser.reload();
-      }
+
+
 
       onClose();
     } catch (err) {
