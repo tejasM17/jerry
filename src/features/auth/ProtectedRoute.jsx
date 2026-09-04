@@ -1,15 +1,15 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useAuth as useClerkAuth } from "@clerk/clerk-react";
+import { useCombinedAuth } from "./useCombinedAuth";
 
 /**
  * Requires a signed-in Clerk session. Renders nested routes via <Outlet />.
  * While Clerk loads, shows a minimal full-screen placeholder.
  */
 export function ProtectedRoute() {
-  const { isLoaded, isSignedIn } = useClerkAuth();
+  const { loading, isSignedIn } = useCombinedAuth();
   const location = useLocation();
 
-  if (!isLoaded) {
+      if (loading) {
     return (
       <div
         className="flex min-h-screen items-center justify-center bg-[var(--surface,#000000)] text-[var(--text-secondary,#a3a3a3)]"
@@ -40,9 +40,9 @@ export function ProtectedRoute() {
  * Public auth pages only — if already signed in, go to app home.
  */
 export function PublicOnlyRoute() {
-  const { isLoaded, isSignedIn } = useClerkAuth();
+  const { loading, isSignedIn } = useCombinedAuth();
 
-  if (!isLoaded) {
+      if (loading) {
     return (
       <div
         className="flex min-h-screen items-center justify-center bg-[#000000]"
