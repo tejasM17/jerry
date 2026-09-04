@@ -1,48 +1,35 @@
 import { createContext, useContext, useMemo, useEffect, useRef } from "react";
-import { useAuth as useClerkAuth, useUser } from "@clerk/clerk-react";
+import { useFirebaseAuth } from "./FirebaseAuthProvider";
 import { API_BASE } from "../../api/base";
 
 const AuthContext = createContext({ user: undefined });
 
 /**
- * Bridges Clerk session into the shape the rest of the app expects:
- * - `user === undefined` while Clerk is loading
- * - `user === null` when signed out
- * - `user` object with uid / email / displayName / photoURL / getIdToken()
+ * Bridges Firebase Auth into the shape the rest of the app expects:
+ *   - `user === undefined` while Firebase is initializing
+ *   - `user === null` when signed out
+ *   - `user` object with uid / email / displayName / photoURL / getIdToken()
  *
- * On sign-in, fire-and-forget POST /api/auth/sync so Mongo user row exists
+ * On sign‑in, fire‑and‑forget POST /api/auth/sync so Mongo user row exists
  * before the first chat list fetch.
  */
 export const AuthProvider = ({ children }) => {
-  const { isLoaded, isSignedIn, getToken, userId } = useClerkAuth();
-  const { user: clerkUser } = useUser();
+  const { user: firebaseUser, loading, getIdToken } = useFirebaseAuth();
   const syncedFor = useRef(null);
 
   const user = useMemo(() => {
-    if (!isLoaded) return undefined;
-    if (!isSignedIn || !clerkUser) return null;
-
-    const primaryEmail =
-      clerkUser.primaryEmailAddress?.emailAddress ??
-      clerkUser.emailAddresses?.[0]?.emailAddress ??
-      "";
-
+    if (loading || firebaseUser === undefined) return undefined;
+    if (!firebaseUser) return null;
     return {
-      uid: userId,
-      email: primaryEmail,
-      displayName:
-        clerkUser.fullName ||
-        clerkUser.username ||
-        primaryEmail.split("@")[0] ||
-        "User",
-      photoURL: clerkUser.imageUrl || null,
-      username: clerkUser.username || null,
-      /** Session JWT for jerry-api. */
-      getIdToken: async () => getToken(),
-      clerkUser,
+      uid: firebaseUser.uid,
+      email: firebaseUser.email,
+      displayName: firebaseUser.displayName,
+      photoURL: firebaseUser.photoURL,
+      getIdToken: firebaseUser.getIdToken || getIdToken,
     };
-  }, [isLoaded, isSignedIn, clerkUser, userId, getToken]);
+  }, [loading, firebaseUser, getIdToken]);
 
+  // Sync user profile to backend once per sign‑in
   useEffect(() => {
     if (!user?.uid || !user.getIdToken) {
       syncedFor.current = null;
@@ -76,9 +63,7 @@ export const AuthProvider = ({ children }) => {
 
   const value = useMemo(() => ({ user }), [user]);
 
-  return (
-    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -2,8 +2,7 @@ import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useCombinedAuth } from "./useCombinedAuth";
 
 /**
- * Requires a signed-in Clerk session. Renders nested routes via <Outlet />.
- * While Clerk loads, shows a minimal full-screen placeholder.
+ * Requires a signed-in Firebase session. Renders nested routes via <Outlet />.
  */
 export function ProtectedRoute() {
   const { loading, isSignedIn } = useCombinedAuth();

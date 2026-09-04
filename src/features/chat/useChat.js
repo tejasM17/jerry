@@ -10,7 +10,7 @@ import {
 } from "../../api/chat";
 
 /**
- * Chat session hook — Clerk JWT + Mongo-backed jerry-api.
+ * Chat session hook — Firebase JWT + Mongo-backed jerry-api.
  *
  * URL model (Grok / ChatGPT style):
  *   /              → empty composer (no session yet)

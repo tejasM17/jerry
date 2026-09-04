@@ -195,11 +195,4 @@
   }
 }
 
-/* Clerk branding fallback if appearance.elements miss a node */
-.cl-footer,
-.cl-footerAction,
-.cl-footerPages,
-.cl-badge,
-a[href*="clerk.com"] {
-  display: none !important;
-}
+

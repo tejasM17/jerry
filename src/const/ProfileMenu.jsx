@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useClerk } from "@clerk/clerk-react";
+import { useFirebaseAuth } from "../features/auth/FirebaseAuthProvider";
 import { FiLogOut, FiSettings, FiUser } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
 import EditProfileModal from "../features/profile/EditProfileModal";
@@ -31,7 +31,7 @@ const ProfileMenu = ({ user, isCollapsed }) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const menuRef = useRef(null);
-  const { signOut } = useClerk();
+  const { signOut } = useFirebaseAuth();
 
   useEffect(() => {
     const handleClickOutside = (e) => {

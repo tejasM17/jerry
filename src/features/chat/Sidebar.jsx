@@ -325,7 +325,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen, chat }) => {
         </div>
       </div>
 
-      {/* Profile footer — live Clerk user */}
+      {/* Profile footer */}
       <div className="shrink-0 border-t border-[var(--border-subtle)] p-2">
         <ProfileMenu user={user} isCollapsed={isCollapsed} />
       </div>
