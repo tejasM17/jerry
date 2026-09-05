@@ -6,7 +6,7 @@
 |------------|--------------------------------------------|------|
 | Framework  | React (JSX) + Vite                         | Front‑end application bundler & dev server |
 | UI         | Tailwind CSS + custom JSX components       | Styling & component library |
-| Auth       | Clerk (`@clerk/clerk-react`)               | Sign-in, session JWT, OAuth + credentials |
+| Auth       | Firebase Auth (`firebase`)                 | Sign-in, ID token, OAuth + credentials |
 | API        | jerry-api (`VITE_API_BASE_URL`)            | Chats, messages, profile, uploads, Gemini stream |
 | Data       | MongoDB via backend only                   | No client DB SDK |
 
