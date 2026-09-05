@@ -1,10 +1,10 @@
 # Jerry - AI Chat Interface
 
-Jerry is a modern, responsive AI chat application built with React, Vite, Tailwind CSS, and **Clerk** authentication.
+Jerry is a modern, responsive AI chat application built with React, Vite, Tailwind CSS, and **Firebase Auth**.
 
 ## Features
 
-- **Clerk auth**: Google OAuth, email + password, username + password, forgot password
+- **Firebase auth**: Google, GitHub, and email + password
 - **Protected routes** for chat and profile
 - **Real-time streaming** AI responses
 - **Markdown** with code highlighting
@@ -16,7 +16,7 @@ Jerry is a modern, responsive AI chat application built with React, Vite, Tailwi
 | --- | --- |
 | Framework | React 19 + Vite 7 |
 | Styling | Tailwind CSS 4 |
-| Auth | Clerk (`@clerk/clerk-react`) |
+| Auth | Firebase Auth (`firebase`) |
 | Routing | React Router 7 |
 | Toasts | sonner |
 | Icons | lucide-react, react-icons |
@@ -27,28 +27,12 @@ Jerry is a modern, responsive AI chat application built with React, Vite, Tailwi
 
 ### 1. Environment
 
-Copy `.env.example` to `.env.development` and set:
+Copy `.env.example` to `.env.development` and set `VITE_API_BASE_URL` plus the `VITE_FIREBASE_*` keys. Production (Vercel) is documented in `PRODUCTION.md`.
 
-```bash
-VITE_API_BASE_URL=http://localhost:5000/api
-VITE_CLERK_PUBLISHABLE_KEY=pk_test_...
-```
+### 2. Firebase Console
 
-Publishable key: [Clerk Dashboard](https://dashboard.clerk.com/) → **API Keys**.
-
-### 2. Clerk Dashboard configuration
-
-Configure these so the in-app `<SignIn />` / `<SignUp />` match the product requirements:
-
-1. **Social** — User & authentication → Social connections → enable **Google**
-2. **Email + password** — enable Email address and Password
-3. **Username** — enable Username as an identifier (sign-in with email *or* username)
-4. **Forgot password** — keep password reset enabled (default with Email+Password)
-5. **Paths / URLs**
-   - Application → Domains / paths: sign-in `/sign-in`, sign-up `/sign-up`
-   - Allowed origins: `http://localhost:5173` (and production frontend URL)
-   - Redirect URLs: `http://localhost:5173`, `http://localhost:5173/sign-in`, etc.
-6. Align **secret key** on the API (`jerry-api` `CLERK_SECRET_KEY`) with the same Clerk application
+1. Enable Email/Password, Google, and GitHub in Authentication → Sign-in method
+2. Add `localhost` and your Vercel host under Authentication → Settings → Authorized domains
 
 ### 3. Install & run
 
@@ -63,16 +47,16 @@ Legacy `/login` and `/register` redirect to Clerk paths.
 
 ### 4. Backend
 
-API must verify Clerk session JWTs (`Authorization: Bearer`). See `jerry-api` README / env (`CLERK_SECRET_KEY`, `FRONTEND_URL`).
+API must verify Firebase ID tokens (`Authorization: Bearer`). See `jerry-api` README / env (`FIREBASE_*`, `FRONTEND_URL`).
 
 ---
 
 ## Auth architecture (frontend)
 
-- `ClerkProvider` in `src/main.jsx` with `VITE_CLERK_PUBLISHABLE_KEY`
+- `FirebaseAuthProvider` in `src/main.jsx`
 - `ProtectedRoute` / `PublicOnlyRoute` in `src/features/auth/ProtectedRoute.jsx`
-- `AuthProvider` bridges Clerk → `{ user, getIdToken() }` for chat API calls
-- After sign-in/up, redirect to `/` (chat). Profile overview at `/profile` (full edit UI is Step 3)
+- `AuthProvider` bridges Firebase → `{ user, getIdToken() }` and POSTs `/api/auth/sync`
+- After sign-in/up, redirect to `/` (chat). Profile at `/profile`
 
 ## Keyboard shortcuts
 
