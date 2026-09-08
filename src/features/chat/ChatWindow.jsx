@@ -6,11 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 /** Static labels only — click pre-fills real composer text (user sends). */
 const SHORTCUTS = [
-  {
-    icon: FiImage,
-    label: "Create an image",
-    prefill: "Create an image of ",
-  },
+  
   {
     icon: FiEdit3,
     label: "Write or edit",
