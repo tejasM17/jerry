@@ -2,6 +2,8 @@
 
 Jerry is a modern, responsive AI chat application built with React, Vite, Tailwind CSS, and **Firebase Auth**.
 
+This Project is hybrid project, here is [backend](https://github.com/tejasM17/jerry) repo. 
+
 ## Features
 
 - **Firebase auth**: Google, GitHub, and email + password
