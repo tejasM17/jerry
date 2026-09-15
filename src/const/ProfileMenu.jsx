@@ -90,11 +90,9 @@ const ProfileMenu = ({ user, isCollapsed }) => {
         aria-label="Profile menu"
         aria-expanded={open}
         aria-haspopup="true"
-        className={`flex w-full items-center rounded-xl transition-all duration-200 ${
-          open
-            ? "bg-[#000000] shadow-sm ring-1 ring-white/10"
-            : "hover:bg-[#000000]"
-        } ${isCollapsed ? "justify-center p-1.5" : "gap-3 px-2.5 py-2.5"}`}
+        className={`flex w-full items-center rounded-lg transition-colors duration-150 ${
+          open ? "bg-white/[0.08]" : "hover:bg-white/[0.05]"
+        } ${isCollapsed ? "justify-center p-1" : "gap-2.5 px-2 py-1.5"}`}
       >
         {avatar}
         {!isCollapsed && (
@@ -117,61 +115,48 @@ const ProfileMenu = ({ user, isCollapsed }) => {
             animate="visible"
             exit="exit"
             role="menu"
-            className={`absolute z-[100] origin-bottom rounded-2xl border border-white/10 bg-[#000000] p-1.5 shadow-2xl mb-2.5 ${
+            className={`absolute z-[100] origin-bottom overflow-hidden rounded-xl border border-white/[0.08] bg-[#1a1a1a] py-1 shadow-[0_8px_32px_rgba(0,0,0,0.55)] mb-2 ${
               isCollapsed ? "bottom-full left-0 w-56" : "bottom-full left-0 right-0"
             }`}
           >
-            <div className="mb-2 border-b border-white/10 px-3 py-3">
-              <div className="flex items-center gap-3">
-                {avatar}
-                <div className="min-w-0">
-                  <div className="truncate text-sm font-bold text-[var(--text-primary)]">
-                    {displayName}
-                  </div>
-                  <div className="truncate text-[11px] font-medium text-[var(--text-tertiary)]">
-                    {email}
-                  </div>
-                </div>
+            <div className="border-b border-white/[0.08] px-3 py-2.5">
+              <div className="truncate text-[13px] font-medium text-zinc-100">
+                {displayName}
               </div>
+              <div className="truncate text-[12px] text-zinc-500">{email}</div>
             </div>
 
-            <div className="space-y-0.5">
+            <div className="py-1">
               <button
                 type="button"
                 role="menuitem"
                 onClick={handleOpenProfile}
-                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-all duration-200 hover:bg-[#000000] hover:text-[var(--text-primary)]"
+                className="flex w-full items-center gap-2.5 px-3 py-[7px] text-[13px] text-zinc-200 transition-colors duration-100 hover:bg-white/[0.06]"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#000000] transition-colors group-hover:bg-[#000000]">
-                  <FiUser size={16} />
-                </div>
-                <span className="font-medium">Profile</span>
+                <FiUser size={14} className="opacity-70" />
+                <span>Profile</span>
               </button>
 
               <button
                 type="button"
                 role="menuitem"
                 onClick={handleOpenSettings}
-                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-[var(--text-secondary)] transition-all duration-200 hover:bg-[#000000] hover:text-[var(--text-primary)]"
+                className="flex w-full items-center gap-2.5 px-3 py-[7px] text-[13px] text-zinc-200 transition-colors duration-100 hover:bg-white/[0.06]"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#000000] transition-colors group-hover:bg-[#000000]">
-                  <FiSettings size={16} />
-                </div>
-                <span className="font-medium">Settings</span>
+                <FiSettings size={14} className="opacity-70" />
+                <span>Settings</span>
               </button>
+            </div>
 
-              <div className="my-1.5 border-t border-white/10" />
-
+            <div className="border-t border-white/[0.08] py-1">
               <button
                 type="button"
                 role="menuitem"
                 onClick={handleLogout}
-                className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-red-500 transition-all duration-200 hover:bg-red-500/10"
+                className="flex w-full items-center gap-2.5 px-3 py-[7px] text-[13px] text-red-400 transition-colors duration-100 hover:bg-white/[0.06]"
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-500/10 transition-colors group-hover:bg-red-500/20">
-                  <FiLogOut size={16} />
-                </div>
-                <span className="font-medium">Log out</span>
+                <FiLogOut size={14} />
+                <span>Log out</span>
               </button>
             </div>
           </motion.div>

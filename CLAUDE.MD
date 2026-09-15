@@ -3,6 +3,9 @@
 Read the following files in order before implementing
 or making any architectural decision:
 
+## Must :
+- read `Architecture-Frontend.md`
+
 1. `context/project-overview.md` — product definition,
    goals, features, and scope
 2. `context/architecture.md` — system structure,
