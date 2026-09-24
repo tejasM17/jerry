@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useFirebaseAuth } from "../features/auth/FirebaseAuthProvider";
 import SocialAuthButtons from "../features/auth/SocialAuthButtons";
 
-const SIGN_IN_BG = "https://i.ibb.co/SDLGPsnD/mountev.webp";
+const SIGN_IN_BG = "/images/loginpage.svg";
 
 function mapAuthError(err) {
   const code = err?.code || "";
