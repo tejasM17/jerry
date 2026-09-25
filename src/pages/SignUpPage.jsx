@@ -5,6 +5,41 @@ import SocialAuthButtons from "../features/auth/SocialAuthButtons";
 
 const SIGN_UP_BG = "/images/loginpage.svg";
 
+const cardClass =
+  "w-full rounded-[18px] border border-cyan-400/75 bg-[#061433]/45 p-6 shadow-[0_0_28px_rgba(56,189,248,0.32),inset_0_1px_0_rgba(125,211,252,0.25)] backdrop-blur-xl";
+const labelClass = "flex items-center gap-2 text-sm font-medium text-cyan-200";
+const fieldClass =
+  "mt-1.5 w-full rounded-xl border border-sky-400/55 bg-[#071428]/60 px-3 py-2.5 text-white outline-none transition focus:border-cyan-300 focus:shadow-[0_0_16px_rgba(56,189,248,0.5)]";
+const primaryClass =
+  "mt-6 w-full rounded-xl bg-[#1a8cff] py-2.5 text-sm font-semibold text-white shadow-[0_0_22px_rgba(37,140,255,0.6)] transition hover:bg-[#3aa0ff] hover:shadow-[0_0_28px_rgba(80,170,255,0.75)] disabled:opacity-60";
+
+function UserIcon() {
+  return (
+    <svg className="h-4 w-4 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <circle cx="12" cy="8" r="3.2" />
+      <path d="M5.5 19.2c1.4-2.6 3.7-3.9 6.5-3.9s5.1 1.3 6.5 3.9" />
+    </svg>
+  );
+}
+
+function MailIcon() {
+  return (
+    <svg className="h-4 w-4 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <path d="M3 7l9 7 9-7" />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg className="h-4 w-4 text-cyan-300" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <rect x="5" y="11" width="14" height="10" rx="2" />
+      <path d="M8 11V8a4 4 0 0 1 8 0v3" />
+    </svg>
+  );
+}
+
 function mapAuthError(err) {
   const code = err?.code || "";
   if (code.includes("email-already-in-use")) return "That email is already registered.";
@@ -66,33 +101,39 @@ const SignUpPage = () => {
             </Link>
           </p>
         </div>
-        <form
-          onSubmit={onSubmit}
-          className="w-full rounded-2xl border border-white/15 bg-black/55 p-6 shadow-xl backdrop-blur-md"
-        >
-          <label className="block text-sm text-white/80">
-            Display name
+        <form onSubmit={onSubmit} className={cardClass}>
+          <label className="block">
+            <span className={labelClass}>
+              <UserIcon />
+              Display name
+            </span>
             <input
               type="text"
               autoComplete="name"
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/50"
+              className={fieldClass}
             />
           </label>
-          <label className="mt-4 block text-sm text-white/80">
-            Email
+          <label className="mt-4 block">
+            <span className={labelClass}>
+              <MailIcon />
+              Email
+            </span>
             <input
               type="email"
               autoComplete="email"
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/50"
+              className={fieldClass}
             />
           </label>
-          <label className="mt-4 block text-sm text-white/80">
-            Password
+          <label className="mt-4 block">
+            <span className={labelClass}>
+              <LockIcon />
+              Password
+            </span>
             <input
               type="password"
               autoComplete="new-password"
@@ -100,7 +141,7 @@ const SignUpPage = () => {
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full rounded-lg border border-white/20 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/50"
+              className={fieldClass}
             />
           </label>
           {error ? (
@@ -111,7 +152,7 @@ const SignUpPage = () => {
           <button
             type="submit"
             disabled={submitting}
-            className="mt-6 w-full rounded-lg bg-white py-2.5 text-sm font-medium text-black disabled:opacity-60"
+            className={primaryClass}
           >
             {submitting ? "Creating account…" : "Create account"}
           </button>
