@@ -55,16 +55,16 @@ export default function SocialAuthButtons({ onError }) {
 
   return (
     <div className="mt-5 space-y-3">
-      <div className="flex items-center gap-3 text-xs uppercase tracking-wide text-white/50">
-        <span className="h-px flex-1 bg-white/20" />
+      <div className="flex items-center gap-3 text-xs uppercase tracking-[0.14em] text-sky-300/55">
+        <span className="h-px flex-1 bg-sky-400/35" />
         or continue with
-        <span className="h-px flex-1 bg-white/20" />
+        <span className="h-px flex-1 bg-sky-400/35" />
       </div>
       <button
         type="button"
         disabled={!!busy}
         onClick={() => run("google", signInWithGoogle)}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-white py-2.5 text-sm font-medium text-neutral-900 disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-sky-400/55 bg-[#071833]/50 py-2.5 text-sm font-medium text-sky-50 shadow-[inset_0_1px_0_rgba(125,211,252,0.15)] backdrop-blur-md transition hover:border-cyan-300/80 hover:shadow-[0_0_16px_rgba(56,189,248,0.45)] disabled:opacity-60"
       >
         <GoogleIcon />
         {busy === "google" ? "Connecting…" : "Continue with Google"}
@@ -73,7 +73,7 @@ export default function SocialAuthButtons({ onError }) {
         type="button"
         disabled={!!busy}
         onClick={() => run("github", signInWithGithub)}
-        className="flex w-full items-center justify-center gap-2 rounded-lg border border-white/20 bg-[#24292f] py-2.5 text-sm font-medium text-white disabled:opacity-60"
+        className="flex w-full items-center justify-center gap-2 rounded-xl border border-sky-400/55 bg-[#071833]/50 py-2.5 text-sm font-medium text-sky-50 shadow-[inset_0_1px_0_rgba(125,211,252,0.15)] backdrop-blur-md transition hover:border-cyan-300/80 hover:shadow-[0_0_16px_rgba(56,189,248,0.45)] disabled:opacity-60"
       >
         <GithubIcon />
         {busy === "github" ? "Connecting…" : "Continue with GitHub"}
