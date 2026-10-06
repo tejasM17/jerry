@@ -7,7 +7,7 @@
 | Framework  | React (JSX) + Vite                         | Front‑end application bundler & dev server |
 | UI         | Tailwind CSS + custom JSX components       | Styling & component library |
 | Auth       | Firebase Auth (`firebase`)                 | Sign-in, ID token, OAuth + credentials |
-| API        | jerry-api (`VITE_API_BASE_URL`)            | Chats, messages, profile, uploads, Gemini stream |
+| API        | jerry-api (`VITE_API_BASE_URL`)            | Chats, messages, profile, uploads, Gemini text stream, Ideogram 4.5 image generation via backend |
 | Data       | MongoDB via backend only                   | No client DB SDK |
 
 ## System Boundaries

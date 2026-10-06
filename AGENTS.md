@@ -13,7 +13,7 @@ npm run dev          # http://localhost:5173
 - **Routing**: React Router v7
 - **Styling**: Tailwind CSS 4 (dark theme)
 - **Auth**: Firebase Auth (`firebase`)
-- **API**: jerry-api (Mongo chats/messages/files + Gemini stream)
+- **API**: jerry-api (Mongo chats/messages/files + Gemini text stream + Ideogram 4.5 image generation via backend)
 - **Animations**: Framer Motion
 - **Icons**: react-icons
 - **Markdown**: react-markdown + rehype-highlight + remark-gfm

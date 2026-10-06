@@ -7,8 +7,8 @@ import { Navigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 const LoadingSkeleton = () => (
-  <div className="flex h-screen bg-[var(--surface)]">
-    <div className="hidden w-[260px] flex-col gap-4 bg-[var(--surface-sidebar)] p-4 md:flex">
+  <div className="flex h-screen bg-bg">
+    <div className="hidden w-[260px] flex-col gap-4 bg-surface-1 p-4 md:flex">
       <div className="shimmer h-8 w-3/4 rounded-lg" />
       <div className="shimmer h-8 w-full rounded-lg" />
       <div className="shimmer h-8 w-full rounded-lg" />
@@ -33,7 +33,7 @@ const ChatPage = () => {
   if (!user) return <Navigate to="/sign-in" replace />;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--surface)] text-[var(--text-primary)]">
+    <div className="flex h-screen overflow-hidden bg-bg text-primary">
       <Sidebar
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
@@ -52,8 +52,8 @@ const ChatPage = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40"
+            transition={{ duration: 0.15, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed inset-0 z-40 bg-bg/80 backdrop-blur-sm md:hidden"
             onClick={() => setSidebarOpen(false)}
             aria-hidden="true"
           />
