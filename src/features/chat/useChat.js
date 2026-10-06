@@ -9,6 +9,50 @@ import {
   readTextStream,
 } from "../../api/chat";
 
+/** Keep GridFS image metadata the API already stores on a message. */
+function normalizeAttachment(file) {
+  if (!file || typeof file !== "object") return null;
+  const fileId = file.fileId || file.id || file._id || undefined;
+  const url =
+    file.url || (fileId ? `/api/chat/files/${fileId}` : undefined);
+  return {
+    fileId,
+    url,
+    mimeType: file.mimeType || file.mimetype || file.contentType || "",
+    name: file.name || file.filename || "file",
+  };
+}
+
+function normalizeMessage(message) {
+  if (!message || typeof message !== "object") return message;
+  const attachments = Array.isArray(message.attachments)
+    ? message.attachments.map(normalizeAttachment).filter(Boolean)
+    : undefined;
+  return {
+    ...message,
+    id: message.id || message._id,
+    content: typeof message.content === "string" ? message.content : "",
+    ...(attachments ? { attachments } : {}),
+  };
+}
+
+function finalizeStreamedAssistant(prev, extra = {}) {
+  const streaming = prev.find((m) => m.role === "streaming");
+  const content = streaming?.content || "";
+  const attachments = Array.isArray(streaming?.attachments)
+    ? streaming.attachments
+    : undefined;
+  return [
+    ...prev.filter((m) => m.role !== "streaming"),
+    {
+      role: "assistant",
+      content,
+      ...(attachments ? { attachments } : {}),
+      ...extra,
+    },
+  ];
+}
+
 /**
  * Chat session hook — Firebase JWT + Mongo-backed jerry-api.
  *
@@ -27,6 +71,7 @@ export const useChat = (user) => {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [imageMode, setImageMode] = useState(false);
   const [activeChatId, setActiveChatId] = useState(null);
   const [activeChatTitle, setActiveChatTitle] = useState(null);
   const [activeRequestId, setActiveRequestId] = useState(null);
@@ -91,7 +136,12 @@ export const useChat = (user) => {
           chatId,
         );
         if (seq !== loadSeq.current) return;
-        setMessages(Array.isArray(data) ? data : []);
+        const list = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.messages)
+            ? data.messages
+            : [];
+        setMessages(list.map(normalizeMessage));
         if (title) setActiveChatTitle(title);
         const publicId = sessionId || chatId;
         setActiveChatId(publicId);
@@ -153,9 +203,13 @@ export const useChat = (user) => {
   }, [goToSession]);
 
   const sendMessage = useCallback(
-    async (prompt, attachments = []) => {
+    async (prompt, attachments = [], options = {}) => {
+      const files = Array.isArray(attachments) ? attachments : [];
+      const mode = options?.mode === "image" ? "image" : "text";
       if (!user || !prompt?.trim()) return;
 
+      // One-shot: image mode applies to this send only.
+      setImageMode(false);
       setLoading(true);
       setError(null);
 
@@ -171,7 +225,12 @@ export const useChat = (user) => {
         pendingUserIndex.current = idx;
         return [
           ...prev,
-          { role: "user", content: prompt, attachments },
+          normalizeMessage({
+            role: "user",
+            content: prompt,
+            attachments: files,
+            mode,
+          }),
         ];
       });
 
@@ -185,7 +244,8 @@ export const useChat = (user) => {
         } = await postChatStream(getToken, {
           chatId: activeChatId,
           prompt,
-          attachments,
+          attachments: files,
+          mode,
         });
 
         // Pin the server-issued id onto the optimistic user message so a
@@ -231,18 +291,9 @@ export const useChat = (user) => {
           });
         });
 
-        setMessages((prev) => {
-          const streaming = prev.find((m) => m.role === "streaming");
-          const content = streaming?.content || "";
-          return [
-            ...prev.filter((m) => m.role !== "streaming"),
-            {
-              role: "assistant",
-              content,
-              requestId: requestId || null,
-            },
-          ];
-        });
+        setMessages((prev) =>
+          finalizeStreamedAssistant(prev, { requestId: requestId || null }),
+        );
       } catch (err) {
         console.error("Error sending message:", err);
         setError(err.message);
@@ -260,6 +311,12 @@ export const useChat = (user) => {
     },
     [user, getToken, activeChatId, goToSession, setSearchParams],
   );
+
+  const retryLastImage = useCallback(() => {
+    const userTurn = [...messages].reverse().find((m) => m.role === "user");
+    if (!userTurn?.content?.trim()) return;
+    sendMessage(userTurn.content, userTurn.attachments || [], { mode: "image" });
+  }, [messages, sendMessage]);
 
   const editMessage = useCallback(
     async (messageId, newPrompt) => {
@@ -304,14 +361,9 @@ export const useChat = (user) => {
           });
         });
 
-        setMessages((prev) => {
-          const streaming = prev.find((m) => m.role === "streaming");
-          const content = streaming?.content || "";
-          return [
-            ...prev.filter((m) => m.role !== "streaming"),
-            { role: "assistant", content, requestId },
-          ];
-        });
+        setMessages((prev) =>
+          finalizeStreamedAssistant(prev, { requestId }),
+        );
       } catch (err) {
         console.error("Error editing message:", err);
         setError(err.message);
@@ -355,6 +407,7 @@ export const useChat = (user) => {
   return {
     messages,
     sendMessage,
+    retryLastImage,
     editMessage,
     loadChat,
     createNewChat,
@@ -368,5 +421,7 @@ export const useChat = (user) => {
     setActiveChatId,
     loading,
     error,
+    imageMode,
+    setImageMode,
   };
 };

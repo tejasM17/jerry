@@ -132,7 +132,7 @@ export async function renameChat(getToken, chatId, title) {
  */
 export async function postChatStream(
   getToken,
-  { chatId, prompt, attachments },
+  { chatId, prompt, attachments, mode },
 ) {
   const endpoint = chatId
     ? `${API_BASE}/chat/${encodeURIComponent(chatId)}/continue`
@@ -143,7 +143,12 @@ export async function postChatStream(
     headers: await authHeaders(getToken, {
       "Content-Type": "application/json",
     }),
-    body: JSON.stringify({ prompt, attachments }),
+    body: JSON.stringify({
+      prompt,
+      attachments,
+      sessionId: chatId || null,
+      mode: mode === "image" ? "image" : "text",
+    }),
   });
 
   if (!res.ok) {
